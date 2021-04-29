@@ -210,6 +210,7 @@ namespace kitronik_VIEW128x64 {
     let GRAPH_Y_MIN_LOCATION = 31
     let GRAPH_Y_MAX_LOCATION = 10
     let previousYPlot = 0
+    let previousLen = 0
 
     //function write one byte of data to the display
     function writeOneByte(regValue: number) {
@@ -621,7 +622,7 @@ namespace kitronik_VIEW128x64 {
     //% weight=100 blockGap=8
     export function plot(plotVariable: number, graphType: GraphSelection, screen?: 1) {
         let plotLength = plotArray.length
-        if (plotLength == 64){
+        if (plotLength == 127){
             plotArray.shift()
         }
         //round the variable to use as ints rather than floats
@@ -660,19 +661,42 @@ namespace kitronik_VIEW128x64 {
                 y = yPlot
                 len = 1
             }
-            
-            for (let i = y; i < (y + len); i++)
-                setPixel(x, i)
-
-            previousYPlot = yPlot
-        }
-        if (plotLength == 64){
-            if (graphType == GraphSelection.stationary){
-                previousYPlot = 0
-                plotArray = []
+            //Clear plots
+            let page = 0
+            for (let i = GRAPH_Y_MAX_LOCATION; i < GRAPH_Y_MIN_LOCATION; i++){
+                page = i >> 3
+                let shift_page = i % 8
+                //let ind = x * (_ZOOM + 1) + page * 128 + 1
+                let ind = x + page * 128 + 1
+                let b = 0 ? (_screen[ind] | (1 << shift_page)) : clrbit(_screen[ind], shift_page)
+                _screen[ind] = b
+                //set_pos(x, page)
+                //pins.i2cWriteBuffer(displayAddress, _screen)
             }
-            clear(screen)
+
+            //refresh()
+            //new plots
+            //page = 0
+            for (let i = y; i < (y + len); i++){
+                page = i >> 3
+                let shift_page = i % 8
+                //let ind = x * (_ZOOM + 1) + page * 128 + 1
+                let ind = x + page * 128 + 1
+                let b = 1 ? (_screen[ind] | (1 << shift_page)) : clrbit(_screen[ind], shift_page)
+                _screen[ind] = b
+            }
+            //setPixel(x, i)
+            previousYPlot = yPlot
+            previousLen = len
         }
+        refresh()
+        //if (plotLength == 127){
+        //    if (graphType == GraphSelection.stationary){
+        //        previousYPlot = 0
+        //        plotArray = []
+        //    }
+        //    clear(screen)
+        //}
     }
     //////////////////////////////////////
     //
@@ -703,19 +727,6 @@ namespace kitronik_VIEW128x64 {
         else{
             y = y-1
         }
-        //limit the x and y depending on the zoom cause the resolution changes
-        //if (_ZOOM){
-         //   if (y > 3)
-         //       y = 3
-         //   if (x > 14)
-         //       x=14
-        //}
-        //else {
-        //    if (y > 7)
-        //        y = 7
-        //    if (x > 27)
-        //        x = 27
-        //}
 
         let col = 0
         let p = 0
