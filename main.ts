@@ -188,11 +188,16 @@ namespace kitronik_VIEW128x64 {
     //    zoomOut = 0
     //}
 
-    
-    let _screen = pins.createBuffer(1025);
+    //Screen buffers for sending data to the display
+    let screenBuf = pins.createBuffer(1025);
+    let ackBuf = pins.createBuffer(2);
     let _buf2 = pins.createBuffer(2);
     let _buf3 = pins.createBuffer(3);
     let _buf4 = pins.createBuffer(4);
+
+    let initalised = false    		//a flag to indicate automatic initalising the display
+
+    //default address forthe display
     let DISPLAY_ADDR_1 = 60
     let DISPLAY_ADDR_2 = 10
     let displayAddress = DISPLAY_ADDR_1;
@@ -207,8 +212,8 @@ namespace kitronik_VIEW128x64 {
     let graphYMin = 0
     let graphYMax = 100
     let graphRange = 100
-    let GRAPH_Y_MIN_LOCATION = 31
-    let GRAPH_Y_MAX_LOCATION = 10
+    let GRAPH_Y_MIN_LOCATION = 63
+    let GRAPH_Y_MAX_LOCATION = 20
     let previousYPlot = 0
     let previousLen = 0
 
@@ -273,28 +278,36 @@ namespace kitronik_VIEW128x64 {
     export function init(screen?: 1) {
         
         displayAddress = setScreenAddr(screen)
-
-        writeOneByte(0xAE)       // SSD1306_DISPLAYOFF
-        writeOneByte(0xA4)       // SSD1306_DISPLAYALLON_RESUME
-        writeTwoByte(0xD5, 0xF0) // SSD1306_SETDISPLAYCLOCKDIV
-        writeTwoByte(0xA8, 0x3F) // SSD1306_SETMULTIPLEX
-        writeTwoByte(0xD3, 0x00) // SSD1306_SETDISPLAYOFFSET
-        writeOneByte(0 | 0x0)    // line #SSD1306_SETSTARTLINE
-        writeTwoByte(0x8D, 0x14) // SSD1306_CHARGEPUMP
-        writeTwoByte(0x20, 0x00) // SSD1306_MEMORYMODE
-        writeThreeByte(0x21, 0, 127) // SSD1306_COLUMNADDR
-        writeThreeByte(0x22, 0, 63)  // SSD1306_PAGEADDR
-        writeOneByte(0xa0 | 0x1) // SSD1306_SEGREMAP
-        writeOneByte(0xc8)       // SSD1306_COMSCANDEC
-        writeTwoByte(0xDA, 0x12) // SSD1306_SETCOMPINS
-        writeTwoByte(0x81, 0xCF) // SSD1306_SETCONTRAST
-        writeTwoByte(0xd9, 0xF1) // SSD1306_SETPRECHARGE
-        writeTwoByte(0xDB, 0x40) // SSD1306_SETVCOMDETECT
-        writeOneByte(0xA6)       // SSD1306_NORMALDISPLAY
-        writeTwoByte(0xD6, 0)    // zoom is set to off
-        writeOneByte(0xAF)       // SSD1306_DISPLAYON
-        clear()
-        //_ZOOM = 0
+        //load the ackBuffer to check is there is a display there before starting initalising of ths display
+        //ackBuf[0] = 0
+        //ackBuf[1] = 0xAF
+        //let ack = pins.i2cWriteBuffer(displayAddress, ackBuf)
+        //if (ack == -1010){ //ifvalue return back is -1010, there is no display and show error message
+        //    basic.showString("ERROR - no display")
+        //}
+        //else{   //start initalising of the display
+            writeOneByte(0xAE)       // SSD1306_DISPLAYOFF
+            writeOneByte(0xA4)       // SSD1306_DISPLAYALLON_RESUME
+            writeTwoByte(0xD5, 0xF0) // SSD1306_SETDISPLAYCLOCKDIV
+            writeTwoByte(0xA8, 0x3F) // SSD1306_SETMULTIPLEX
+            writeTwoByte(0xD3, 0x00) // SSD1306_SETDISPLAYOFFSET
+            writeOneByte(0 | 0x0)    // line #SSD1306_SETSTARTLINE
+            writeTwoByte(0x8D, 0x14) // SSD1306_CHARGEPUMP
+            writeTwoByte(0x20, 0x00) // SSD1306_MEMORYMODE
+            writeThreeByte(0x21, 0, 127) // SSD1306_COLUMNADDR
+            writeThreeByte(0x22, 0, 63)  // SSD1306_PAGEADDR
+            writeOneByte(0xa0 | 0x1) // SSD1306_SEGREMAP
+            writeOneByte(0xc8)       // SSD1306_COMSCANDEC
+            writeTwoByte(0xDA, 0x12) // SSD1306_SETCOMPINS
+            writeTwoByte(0x81, 0xCF) // SSD1306_SETCONTRAST
+            writeTwoByte(0xd9, 0xF1) // SSD1306_SETPRECHARGE
+            writeTwoByte(0xDB, 0x40) // SSD1306_SETVCOMDETECT
+            writeOneByte(0xA6)       // SSD1306_NORMALDISPLAY
+            writeTwoByte(0xD6, 0)    // zoom is set to off
+            writeOneByte(0xAF)       // SSD1306_DISPLAYON
+            clear()
+            //_ZOOM = 0
+            initalised = true
     }
 
     /**
@@ -312,13 +325,15 @@ namespace kitronik_VIEW128x64 {
     export function setPixel(x: number, y: number, screen?: 1) {
 
         displayAddress = setScreenAddr(screen)
+        //if (initalised == false)
+        //    init()
 
         let page = y >> 3
         let shift_page = y % 8
         //let ind = x * (_ZOOM + 1) + page * 128 + 1
         let ind = x + page * 128 + 1
-        let b = 1 ? (_screen[ind] | (1 << shift_page)) : clrbit(_screen[ind], shift_page)
-        _screen[ind] = b
+        let b = 1 ? (screenBuf[ind] | (1 << shift_page)) : clrbit(screenBuf[ind], shift_page)
+        screenBuf[ind] = b
         set_pos(x, page)
         _buf2[0] = 0x40
         _buf2[1] = b
@@ -340,13 +355,15 @@ namespace kitronik_VIEW128x64 {
     export function clearPixel(x: number, y: number, screen?: 1) {
 
         displayAddress = setScreenAddr(screen)
+        //if (initalised == false)
+        //    init()
 
         let page = y >> 3
         let shift_page = y % 8
         //let ind = x * (_ZOOM + 1) + page * 128 + 1
         let ind = x + page * 128 + 1
-        let b = 0 ? (_screen[ind] | (1 << shift_page)) : clrbit(_screen[ind], shift_page)
-        _screen[ind] = b
+        let b = 0 ? (screenBuf[ind] | (1 << shift_page)) : clrbit(screenBuf[ind], shift_page)
+        screenBuf[ind] = b
         set_pos(x, page)
         _buf2[0] = 0x40
         _buf2[1] = b
@@ -374,6 +391,8 @@ namespace kitronik_VIEW128x64 {
         let numberOfCharOnLine = 14
         let s = convertToText(inputData)
         displayAddress = setScreenAddr(screen)
+        //if (initalised == false)
+        //    init()
 
         if (!displayShowAlign){//if variable y has not been used, default to y position of 0
             displayShowAlign=ShowAlign.Left
@@ -481,7 +500,7 @@ namespace kitronik_VIEW128x64 {
                     ind = (x + n) * 5 + y * 128 + i + 1
                     //if (color == 0)
                         //col = 255 - col
-                    _screen[ind] = col
+                    screenBuf[ind] = col
                     //if (_ZOOM)
                     //    _screen[ind + 1] = col
                 }
@@ -489,7 +508,7 @@ namespace kitronik_VIEW128x64 {
             set_pos(x * 5, y)
             //let ind0 = x * 5 * (_ZOOM + 1) + y * 128
             let ind0 = x * 5 + y * 128
-            let buf = _screen.slice(ind0, ind + 1)
+            let buf = screenBuf.slice(ind0, ind + 1)
             buf[0] = 0x40
             pins.i2cWriteBuffer(displayAddress, buf)
             y += 1 
@@ -565,10 +584,12 @@ namespace kitronik_VIEW128x64 {
     //% weight=63 blockGap=8
     export function clear(screen?: DisplaySelection) {
         displayAddress = setScreenAddr(screen)
-        _screen.fill(0)
-        _screen[0] = 0x40
+        //if (initalised == false)
+        //    init()
+        screenBuf.fill(0)
+        screenBuf[0] = 0x40
         set_pos()
-        pins.i2cWriteBuffer(displayAddress, _screen)
+        pins.i2cWriteBuffer(displayAddress, screenBuf)
     }
 
     /**
@@ -583,6 +604,8 @@ namespace kitronik_VIEW128x64 {
     //% weight=80 blockGap=8
     export function controlDisplayOnOff(output: boolean, screen?: 1) {
         displayAddress = setScreenAddr(screen)
+        //if (initalised == false)
+        //    init()
         
         if (output == true) {
             writeOneByte(0xAF)
@@ -621,6 +644,9 @@ namespace kitronik_VIEW128x64 {
     //% block="plot %plotVariable| with a %graphType| action onto display"
     //% weight=100 blockGap=8
     export function plot(plotVariable: number, graphType: GraphSelection, screen?: 1) {
+        displayAddress = setScreenAddr(screen)
+        //if (initalised == false)
+        //    init()
         let plotLength = plotArray.length
         if (plotLength == 127){
             plotArray.shift()
@@ -668,10 +694,10 @@ namespace kitronik_VIEW128x64 {
                 let shift_page = i % 8
                 //let ind = x * (_ZOOM + 1) + page * 128 + 1
                 let ind = x + page * 128 + 1
-                let b = 0 ? (_screen[ind] | (1 << shift_page)) : clrbit(_screen[ind], shift_page)
-                _screen[ind] = b
+                let b = 0 ? (screenBuf[ind] | (1 << shift_page)) : clrbit(screenBuf[ind], shift_page)
+                screenBuf[ind] = b
                 //set_pos(x, page)
-                //pins.i2cWriteBuffer(displayAddress, _screen)
+                //pins.i2cWriteBuffer(displayAddress, screenBuf)
             }
 
             //refresh()
@@ -682,8 +708,8 @@ namespace kitronik_VIEW128x64 {
                 let shift_page = i % 8
                 //let ind = x * (_ZOOM + 1) + page * 128 + 1
                 let ind = x + page * 128 + 1
-                let b = 1 ? (_screen[ind] | (1 << shift_page)) : clrbit(_screen[ind], shift_page)
-                _screen[ind] = b
+                let b = 1 ? (screenBuf[ind] | (1 << shift_page)) : clrbit(screenBuf[ind], shift_page)
+                screenBuf[ind] = b
             }
             //setPixel(x, i)
             previousYPlot = yPlot
@@ -719,6 +745,8 @@ namespace kitronik_VIEW128x64 {
     //% y.min = 1
     export function showString(inputData: any, x: number, y: number, screen?: 1) {
         displayAddress = setScreenAddr(screen)
+        //if (initalised == false)
+         //   init()
         let s = convertToText(inputData)
 
         if (y=0){//if variable y has not been used, default to y position of 0
@@ -740,14 +768,14 @@ namespace kitronik_VIEW128x64 {
                         col |= (1 << (j + 1))
                 }
                 ind = (x + n) * 5 + y * 128 + i + 1
-                _screen[ind] = col
+                screenBuf[ind] = col
                 //if (_ZOOM)
                 //    _screen[ind + 1] = col
             }
         }
         set_pos(x * 5, y)
         let ind0 = x * 5 + y * 128
-        let buf = _screen.slice(ind0, ind + 1)
+        let buf = screenBuf.slice(ind0, ind + 1)
         buf[0] = 0x40
         pins.i2cWriteBuffer(displayAddress, buf)
     }
@@ -763,8 +791,10 @@ namespace kitronik_VIEW128x64 {
     //% weight=63 blockGap=8
     export function refresh(screen?: 1) {
         displayAddress = setScreenAddr(screen)
+        //if (initalised == false)
+        //    init()
         set_pos()
-        pins.i2cWriteBuffer(displayAddress, _screen)
+        pins.i2cWriteBuffer(displayAddress, screenBuf)
     }
 
     /**
@@ -778,6 +808,8 @@ namespace kitronik_VIEW128x64 {
     export function invert(output: boolean, screen?: 1) {
         let invertRegisterValue = 0
         displayAddress = setScreenAddr(screen)
+        //if (initalised == false)
+        //    init()
         //let n = (output) ? 0xA7 : 0xA6
         if (output == true){
             invertRegisterValue = 0xA7
