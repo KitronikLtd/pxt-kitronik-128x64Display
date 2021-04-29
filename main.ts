@@ -156,6 +156,9 @@ namespace kitronik_VIEW128x64 {
         stationary
     }
 
+    /**
+     * Select the alignment of text
+     */
     export enum ShowAlign {
         //% block="Left"
         Left,
@@ -178,19 +181,21 @@ namespace kitronik_VIEW128x64 {
     /**
      * Selecting zoom option
      */
-    export enum ZoomSelection {
-        //% block="in"
-        zoomIn = 1,
-        //% block="out"
-        zoomOut = 0
-    }
+    //export enum ZoomSelection {
+    //    //% block="in"
+    //    zoomIn = 1,
+    //    //% block="out"
+    //    zoomOut = 0
+    //}
 
-    let _I2CAddr = 60;
+    
     let _screen = pins.createBuffer(1025);
     let _buf2 = pins.createBuffer(2);
     let _buf3 = pins.createBuffer(3);
     let _buf4 = pins.createBuffer(4);
-    let _ZOOM = 1;
+    let DISPLAY_ADDR_1 = 60
+    let DISPLAY_ADDR_2 = 10
+    let displayAddress = DISPLAY_ADDR_1;
 
     //text alignment
     let displayShowAlign = ShowAlign.Left
@@ -206,33 +211,33 @@ namespace kitronik_VIEW128x64 {
     let GRAPH_Y_MAX_LOCATION = 10
     let previousYPlot = 0
 
-
-
-    function cmd1(d: number) {
-        let n = d % 256;
-        pins.i2cWriteNumber(_I2CAddr, n, NumberFormat.UInt16BE);
+    //function write one byte of data to the display
+    function writeOneByte(regValue: number) {
+        let n = regValue % 256;
+        pins.i2cWriteNumber(displayAddress, n, NumberFormat.UInt16BE);
     }
 
-    function cmd2(d1: number, d2: number) {
+    //function write two byte of data to the display
+    function writeTwoByte(regValue1: number, regValue2: number) {
         _buf3[0] = 0;
-        _buf3[1] = d1;
-        _buf3[2] = d2;
-        pins.i2cWriteBuffer(_I2CAddr, _buf3);
+        _buf3[1] = regValue1;
+        _buf3[2] = regValue2;
+        pins.i2cWriteBuffer(displayAddress, _buf3);
     }
 
-    function cmd3(d1: number, d2: number, d3: number) {
+    //function write three byte of data to the display
+    function writeThreeByte(regValue1: number, regValue2: number, regValue3: number) {
         _buf4[0] = 0;
-        _buf4[1] = d1;
-        _buf4[2] = d2;
-        _buf4[3] = d3;
-        pins.i2cWriteBuffer(_I2CAddr, _buf4);
+        _buf4[1] = regValue1;
+        _buf4[2] = regValue2;
+        _buf4[3] = regValue3;
+        pins.i2cWriteBuffer(displayAddress, _buf4);
     }
 
     function set_pos(col: number = 0, page: number = 0) {
-        cmd1(0xb0 | page) // page number
-        let c = col * (_ZOOM + 1)
-        cmd1(0x00 | (c % 16)) // lower start column address
-        cmd1(0x10 | (c >> 4)) // upper start column address    
+        writeOneByte(0xb0 | page) // page number
+        writeOneByte(0x00 | (col % 16)) // lower start column address
+        writeOneByte(0x10 | (col >> 4)) // upper start column address    
     }
 
     // clear bit
@@ -246,13 +251,13 @@ namespace kitronik_VIEW128x64 {
     function setScreenAddr(selection: any): number {
         let addr = 0
         if (selection == DisplaySelection.displayTwo){
-            addr = 61
+            addr = DISPLAY_ADDR_2
         }   
         else if (selection == DisplaySelection.displayOne){
-            addr = 60
+            addr = DISPLAY_ADDR_1
         }
         else {
-            addr = 60
+            addr = DISPLAY_ADDR_1
         }     
         return addr
     }
@@ -261,34 +266,34 @@ namespace kitronik_VIEW128x64 {
      * Setup of display ready for using
      * @param screen is the selection of which screen to initialise
      */
-    //% blockId="VIEW128x64_init" block="setup display|| %screen"
+    //% blockId="VIEW128x64_init" block="setup display"
     //% group="Control"
     //% weight=100 blockGap=8
-    export function init(screen?: DisplaySelection) {
+    export function init(screen?: 1) {
         
-        _I2CAddr = setScreenAddr(screen)
+        displayAddress = setScreenAddr(screen)
 
-        cmd1(0xAE)       // SSD1306_DISPLAYOFF
-        cmd1(0xA4)       // SSD1306_DISPLAYALLON_RESUME
-        cmd2(0xD5, 0xF0) // SSD1306_SETDISPLAYCLOCKDIV
-        cmd2(0xA8, 0x3F) // SSD1306_SETMULTIPLEX
-        cmd2(0xD3, 0x00) // SSD1306_SETDISPLAYOFFSET
-        cmd1(0 | 0x0)    // line #SSD1306_SETSTARTLINE
-        cmd2(0x8D, 0x14) // SSD1306_CHARGEPUMP
-        cmd2(0x20, 0x00) // SSD1306_MEMORYMODE
-        cmd3(0x21, 0, 127) // SSD1306_COLUMNADDR
-        cmd3(0x22, 0, 63)  // SSD1306_PAGEADDR
-        cmd1(0xa0 | 0x1) // SSD1306_SEGREMAP
-        cmd1(0xc8)       // SSD1306_COMSCANDEC
-        cmd2(0xDA, 0x12) // SSD1306_SETCOMPINS
-        cmd2(0x81, 0xCF) // SSD1306_SETCONTRAST
-        cmd2(0xd9, 0xF1) // SSD1306_SETPRECHARGE
-        cmd2(0xDB, 0x40) // SSD1306_SETVCOMDETECT
-        cmd1(0xA6)       // SSD1306_NORMALDISPLAY
-        cmd2(0xD6, 1)    // zoom on
-        cmd1(0xAF)       // SSD1306_DISPLAYON
-        erase()
-        _ZOOM = 1
+        writeOneByte(0xAE)       // SSD1306_DISPLAYOFF
+        writeOneByte(0xA4)       // SSD1306_DISPLAYALLON_RESUME
+        writeTwoByte(0xD5, 0xF0) // SSD1306_SETDISPLAYCLOCKDIV
+        writeTwoByte(0xA8, 0x3F) // SSD1306_SETMULTIPLEX
+        writeTwoByte(0xD3, 0x00) // SSD1306_SETDISPLAYOFFSET
+        writeOneByte(0 | 0x0)    // line #SSD1306_SETSTARTLINE
+        writeTwoByte(0x8D, 0x14) // SSD1306_CHARGEPUMP
+        writeTwoByte(0x20, 0x00) // SSD1306_MEMORYMODE
+        writeThreeByte(0x21, 0, 127) // SSD1306_COLUMNADDR
+        writeThreeByte(0x22, 0, 63)  // SSD1306_PAGEADDR
+        writeOneByte(0xa0 | 0x1) // SSD1306_SEGREMAP
+        writeOneByte(0xc8)       // SSD1306_COMSCANDEC
+        writeTwoByte(0xDA, 0x12) // SSD1306_SETCOMPINS
+        writeTwoByte(0x81, 0xCF) // SSD1306_SETCONTRAST
+        writeTwoByte(0xd9, 0xF1) // SSD1306_SETPRECHARGE
+        writeTwoByte(0xDB, 0x40) // SSD1306_SETVCOMDETECT
+        writeOneByte(0xA6)       // SSD1306_NORMALDISPLAY
+        writeTwoByte(0xD6, 0)    // zoom is set to off
+        writeOneByte(0xAF)       // SSD1306_DISPLAYON
+        clear()
+        //_ZOOM = 0
     }
 
     /**
@@ -297,43 +302,34 @@ namespace kitronik_VIEW128x64 {
      * @param y is Y alis, eg: 0
      * @param screen is screen selection when using multiple screens
      */
-    //% blockId="VIEW128x64_set_pixel" block="show pixel at x %x|y %y ||on display %screen"
+    //% blockId="VIEW128x64_set_pixel" block="show pixel at x %x|y %y"
     //% group="Show"
     //% weight=70 blockGap=8
+    //% x.min=0, x.max=127
+    //% y.min=0, y.max=63
     //% inlineInputMode=inline
-    export function setPixel(x: number, y: number, screen?: DisplaySelection) {
+    export function setPixel(x: number, y: number, screen?: 1) {
 
-        _I2CAddr = setScreenAddr(screen)
-        if (_ZOOM){
-            if (x > 63)
-                x = 63
-            if (y > 31)
-                y = 31
-        }
-        else {
-            if (x > 127)
-                x = 127
-            if (y > 63)
-                y = 63
-        }
+        displayAddress = setScreenAddr(screen)
 
         let page = y >> 3
         let shift_page = y % 8
-        let ind = x * (_ZOOM + 1) + page * 128 + 1
+        //let ind = x * (_ZOOM + 1) + page * 128 + 1
+        let ind = x + page * 128 + 1
         let b = 1 ? (_screen[ind] | (1 << shift_page)) : clrbit(_screen[ind], shift_page)
         _screen[ind] = b
         set_pos(x, page)
-        if (_ZOOM) {
-            _screen[ind + 1] = b
-            _buf3[0] = 0x40
-            _buf3[1] = _buf3[2] = b
-            pins.i2cWriteBuffer(_I2CAddr, _buf3)
-        }
-        else {
+        //if (_ZOOM) {
+        //    _screen[ind + 1] = b
+        //    _buf3[0] = 0x40
+        //    _buf3[1] = _buf3[2] = b
+        //    pins.i2cWriteBuffer(displayAddress, _buf3)
+        //}
+        //else {
             _buf2[0] = 0x40
             _buf2[1] = b
-            pins.i2cWriteBuffer(_I2CAddr, _buf2)
-        }
+            pins.i2cWriteBuffer(displayAddress, _buf2)
+       // }
     }
 
 
@@ -345,40 +341,32 @@ namespace kitronik_VIEW128x64 {
      * @param inputData is the text will be show
      * @param screen is screen selection when using multiple screens
      */
-    //% blockId="VIEW128x64_show" block="show %s|| on line %line| with alignment: %displayShowAlign | on display %screen"
+    //% blockId="VIEW128x64_show" block="show %s|| on line %line| with alignment: %displayShowAlign"
     //% weight=80 blockGap=8
     //% group="Show"
-    //% parts=VIEWOLED_I2C trackArgs=0
     //% expandableArgumentMode="enable"
     //% inlineInputMode=inline
-    //% line.min=1
-    export function show(inputData: any,  line?: number, displayShowAlign?: ShowAlign, screen?: DisplaySelection) {
+    //% line.min=1 line.max=8
+    export function show(inputData: any,  line?: number, displayShowAlign?: ShowAlign, screen?: 1) {
         let y = 0
         let x = 0
         let numberOfCharOnLine = 14
         let s = convertToText(inputData)
-        _I2CAddr = setScreenAddr(screen)
+        displayAddress = setScreenAddr(screen)
 
         if (!displayShowAlign){//if variable y has not been used, default to y position of 0
             displayShowAlign=ShowAlign.Left
         }
 
-        if (!line){//if variable y has not been used, default to y position of 0
+        //if variable y has not been used, default to y position of 0
+        if (!line){
             y=0
         }
         else{
             y = (line-1)
         }
-        if (_ZOOM){
-            numberOfCharOnLine = 14
-            if (y > 3)
-                y = 3
-        }
-        else {
-            numberOfCharOnLine = 27
-            if (y > 7)
-                y = 7
-        }
+        
+        numberOfCharOnLine = 27
 
         //sort text into lines
         let lengthOfText = s.length
@@ -441,16 +429,13 @@ namespace kitronik_VIEW128x64 {
             
             if (s.length < numberOfCharOnLine)
             {
-                //basic.showNumber(0)
                 while(s.length < numberOfCharOnLine){
                     if (displayShowAlign == ShowAlign.Left){
                         s = s + " "
-                        //basic.showNumber(1)
                     }
                     else if (displayShowAlign == ShowAlign.Centre){
                         if (s.length % 2 == 0){
                             s = " " + s + " "
-                            //basic.showNumber(2)
                         }
                         else {
                             s = s + " "
@@ -458,7 +443,6 @@ namespace kitronik_VIEW128x64 {
                     } 
                     else if (displayShowAlign == ShowAlign.Right){
                         s = " " + s
-                        //basic.showNumber(3)
                     }
                 }
                  
@@ -472,19 +456,21 @@ namespace kitronik_VIEW128x64 {
                         if (p & (1 << (5 * i + j)))
                             col |= (1 << (j + 1))
                     }
-                    ind = (x + n) * 5 * (_ZOOM + 1) + y * 128 + i * (_ZOOM + 1) + 1
+                    //ind = (x + n) * 5 * (_ZOOM + 1) + y * 128 + i * (_ZOOM + 1) + 1
+                    ind = (x + n) * 5 + y * 128 + i + 1
                     //if (color == 0)
                         //col = 255 - col
                     _screen[ind] = col
-                    if (_ZOOM)
-                        _screen[ind + 1] = col
+                    //if (_ZOOM)
+                    //    _screen[ind + 1] = col
                 }
             }
             set_pos(x * 5, y)
-            let ind0 = x * 5 * (_ZOOM + 1) + y * 128
+            //let ind0 = x * 5 * (_ZOOM + 1) + y * 128
+            let ind0 = x * 5 + y * 128
             let buf = _screen.slice(ind0, ind + 1)
             buf[0] = 0x40
-            pins.i2cWriteBuffer(_I2CAddr, buf)
+            pins.i2cWriteBuffer(displayAddress, buf)
             y += 1 
         }
 
@@ -498,28 +484,35 @@ namespace kitronik_VIEW128x64 {
      * @param len is the length of line, eg: 10
      * @param screen is screen selection when using multiple screens
      */
-    //% blockId="VIEW128x64_draw_line" block="draw a %lineDirection | line with length of %len starting at x %x|y %y ||on display %screen"
+    //% blockId="VIEW128x64_draw_line" block="draw a %lineDirection | line with length of %len starting at x %x|y %y"
     //% weight=72 blockGap=8
     //% group="Draw"
+    //% x.min=0, x.max=127
+    //% y.min=0, y.max=63
+    //% len.min=1, len.max=127
     //% inlineInputMode=inline
-    export function drawLine(lineDirection: LineDirectionSelection, len: number, x: number, y: number, screen?: DisplaySelection) {
-        if (_ZOOM){
-            if (x > 63)
-                x = 63
-            if (y > 31)
-                y = 31
-        }
-        else {
-            if (x > 127)
-                x = 127
-            if (y > 63)
-                y = 63
-        }
+    export function drawLine(lineDirection: LineDirectionSelection, len: number, x: number, y: number, screen?: 1) {
+        //if (_ZOOM){
+        //    if (x > 63)
+        //        x = 63
+        //    if (y > 31)
+        //        y = 31
+        //}
+        //else {
+        //    if (x > 127)
+        //        x = 127
+        //    if (y > 63)
+        //        y = 63
+        //}
         if (lineDirection == LineDirectionSelection.horiztonal){
             for (let i = x; i < (x + len); i++)
                 setPixel(i, y, screen)
         }
         else if (lineDirection == LineDirectionSelection.vertical){
+            if (len >= 64)
+            {
+                len = 63
+            }
             for (let i = y; i < (y + len); i++)
                 setPixel(x, i, screen)
         }   
@@ -533,38 +526,33 @@ namespace kitronik_VIEW128x64 {
      * @param y is the start position on the Y axis, eg: 0
      * @param screen is screen selection when using multiple screens
      */
-    //% blockId="VIEW128x64_draw_rect" block="draw a rectangle wide %width|high %height|from position x %x|y %y||on display %screen"
+    //% blockId="VIEW128x64_draw_rect" block="draw a rectangle wide %width|high %height|from position x %x|y %y"
     //% weight=71 blockGap=8
     //% group="Draw"
     //% inlineInputMode=inline
-    //% width.min=1 width.max=60
-    //% height.min=1 height.max=30
-    //% x.min=0 x.max=60
-    //% y.min=0 y.max=30
-    export function drawRect(width: number, height: number, x: number, y: number, screen?: DisplaySelection) {
-        if (_ZOOM){
-            if (x > 63)
-                x = 63
-            if (y > 31)
-                y = 31
-        }
-        else {
-            if (x > 127)
-                x = 127
-            if (y > 63)
-                y = 63
-        }
+    //% width.min=1 width.max=127
+    //% height.min=1 height.max=63
+    //% x.min=0 x.max=127
+    //% y.min=0 y.max=63
+    export function drawRect(width: number, height: number, x: number, y: number, screen?: 1) {
+        //if (_ZOOM){
+        //    if (x > 63)
+        //        x = 63
+        //    if (y > 31)
+        //        y = 31
+        //}
+        //else {
+        //    if (x > 127)
+        //        x = 127
+        //    if (y > 63)
+        //        y = 63
+        //}
         
         if (!x)     //if variable x has not been used, default to x position of 0
-            x = 0
+            x=0
         
         if (!y)     //if variable y has not been used, default to y position of 0
             y=0
-
-        //hline(x, y, width - x + 1, screen)
-        //hline(x, height, width - x + 1, screen)
-        //vline(x, y, height - y + 1, screen)
-        //vline(width, y, height - y + 1, screen)
 
         drawLine(LineDirectionSelection.horiztonal, x, y, width - x + 1, screen)
         drawLine(LineDirectionSelection.horiztonal, x, height, width - x + 1, screen)
@@ -576,15 +564,15 @@ namespace kitronik_VIEW128x64 {
      * clear screen
      * @param screen is screen selection when using multiple screens
      */
-    //% blockId="VIEW128x64_clear" block="erase display ||%screen"
+    //% blockId="VIEW128x64_clear" block="clear display ||%screen"
     //% group="Delete"
     //% weight=63 blockGap=8
-    export function erase(screen?: DisplaySelection) {
-        _I2CAddr = setScreenAddr(screen)
+    export function clear(screen?: DisplaySelection) {
+        displayAddress = setScreenAddr(screen)
         _screen.fill(0)
         _screen[0] = 0x40
         set_pos()
-        pins.i2cWriteBuffer(_I2CAddr, _screen)
+        pins.i2cWriteBuffer(displayAddress, _screen)
     }
 
     /**
@@ -593,18 +581,18 @@ namespace kitronik_VIEW128x64 {
      * @param screen is screen selection when using multiple screens
      */
     //% blockId=VIEW128x64_display_on_off_control
-    //% block="turn %output=on_off_toggle| display ||%screen"
+    //% block="turn %output=on_off_toggle| display"
     //% group="Control"
     //% expandableArgumentMode="toggle"
     //% weight=80 blockGap=8
-    export function controlDisplayOnOff(output: boolean, screen?: DisplaySelection) {
-        _I2CAddr = setScreenAddr(screen)
+    export function controlDisplayOnOff(output: boolean, screen?: 1) {
+        displayAddress = setScreenAddr(screen)
         
         if (output == true) {
-            cmd1(0xAF)
+            writeOneByte(0xAF)
         }
         else {
-            cmd1(0xAE)
+            writeOneByte(0xAE)
         }
     }
 
@@ -634,9 +622,9 @@ namespace kitronik_VIEW128x64 {
      */
     //% blockId="VIEW128x64_plot_request"
     //% group="Draw"
-    //% block="plot %plotVariable| with a %graphType| action onto display || %screen"
+    //% block="plot %plotVariable| with a %graphType| action onto display"
     //% weight=100 blockGap=8
-    export function plot(plotVariable: number, graphType: GraphSelection, screen?: DisplaySelection) {
+    export function plot(plotVariable: number, graphType: GraphSelection, screen?: 1) {
         let plotLength = plotArray.length
         if (plotLength == 64){
             plotArray.shift()
@@ -688,7 +676,7 @@ namespace kitronik_VIEW128x64 {
                 previousYPlot = 0
                 plotArray = []
             }
-            erase(screen)
+            clear(screen)
         }
     }
     //////////////////////////////////////
@@ -705,13 +693,13 @@ namespace kitronik_VIEW128x64 {
      * @param s is the variable or number or text that will be shown on the display
      * @param screen is screen selection when using multiple screens
      */
-    //% blockId="VIEW128x64_show_at_position" block="show %inputData shifted by %x|on line %y| display ||%screen"
+    //% blockId="VIEW128x64_show_at_position" block="show %inputData shifted by %x|on line %y"
     //% subcategory=advanced
     //% group="Show"
     //% weight=80 blockGap=8
     //% y.min = 1
-    export function showString(inputData: any, x: number, y: number, screen?: DisplaySelection) {
-        _I2CAddr = setScreenAddr(screen)
+    export function showString(inputData: any, x: number, y: number, screen?: 1) {
+        displayAddress = setScreenAddr(screen)
         let s = convertToText(inputData)
 
         if (y=0){//if variable y has not been used, default to y position of 0
@@ -721,18 +709,18 @@ namespace kitronik_VIEW128x64 {
             y = y-1
         }
         //limit the x and y depending on the zoom cause the resolution changes
-        if (_ZOOM){
-            if (y > 3)
-                y = 3
-            if (x > 14)
-                x=14
-        }
-        else {
-            if (y > 7)
-                y = 7
-            if (x > 27)
-                x = 27
-        }
+        //if (_ZOOM){
+         //   if (y > 3)
+         //       y = 3
+         //   if (x > 14)
+         //       x=14
+        //}
+        //else {
+        //    if (y > 7)
+        //        y = 7
+        //    if (x > 27)
+        //        x = 27
+        //}
 
         let col = 0
         let p = 0
@@ -745,37 +733,19 @@ namespace kitronik_VIEW128x64 {
                     if (p & (1 << (5 * i + j)))
                         col |= (1 << (j + 1))
                 }
-                ind = (x + n) * 5 * (_ZOOM + 1) + y * 128 + i * (_ZOOM + 1) + 1
+                ind = (x + n) * 5 + y * 128 + i + 1
                 _screen[ind] = col
-                if (_ZOOM)
-                    _screen[ind + 1] = col
+                //if (_ZOOM)
+                //    _screen[ind + 1] = col
             }
         }
         set_pos(x * 5, y)
-        let ind0 = x * 5 * (_ZOOM + 1) + y * 128
+        let ind0 = x * 5 + y * 128
         let buf = _screen.slice(ind0, ind + 1)
         buf[0] = 0x40
-        pins.i2cWriteBuffer(_I2CAddr, buf)
+        pins.i2cWriteBuffer(displayAddress, buf)
     }
 
-    /**
-     * zoom mode
-     * @param d true zoom / false normal, eg: true
-     */
-    //% subcategory=advanced
-    //% group="Control"
-    //% blockId="VIEW128x64_zoom_display" block="zoom %d"
-    //% weight=64 blockGap=8
-    export function zoom(d: ZoomSelection) {
-        if (d == ZoomSelection.zoomIn){
-            d = 1
-        }
-        else if (d == ZoomSelection.zoomOut){
-            d = 0
-        }
-        _ZOOM = (d) ? 1 : 0
-        cmd2(0xd6, _ZOOM)
-    }
 
     /**
      * Block will update or efresh the screen if any data has been changed
@@ -783,12 +753,12 @@ namespace kitronik_VIEW128x64 {
      */
     //% subcategory=advanced
     //% group="Control"
-    //% blockId="VIEW128x64_draw" block="refresh display ||screen?: DisplaySelection"
+    //% blockId="VIEW128x64_draw" block="refresh display"
     //% weight=63 blockGap=8
-    export function refresh(screen?: DisplaySelection) {
-        _I2CAddr = setScreenAddr(screen)
+    export function refresh(screen?: 1) {
+        displayAddress = setScreenAddr(screen)
         set_pos()
-        pins.i2cWriteBuffer(_I2CAddr, _screen)
+        pins.i2cWriteBuffer(displayAddress, _screen)
     }
 
     /**
@@ -799,9 +769,17 @@ namespace kitronik_VIEW128x64 {
     //% group="Control"
     //% blockId="VIEW128x64_invert_screen" block="inverted display %output=on_off_toggle"
     //% weight=62 blockGap=8
-    export function invert(output: boolean) {
-        let n = (output) ? 0xA7 : 0xA6
-        cmd1(n)
+    export function invert(output: boolean, screen?: 1) {
+        let invertRegisterValue = 0
+        displayAddress = setScreenAddr(screen)
+        //let n = (output) ? 0xA7 : 0xA6
+        if (output == true){
+            invertRegisterValue = 0xA7
+        }
+        else{
+           invertRegisterValue = 0xA7 
+        }
+        writeOneByte(invertRegisterValue)
     }
 
 }
