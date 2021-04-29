@@ -319,17 +319,37 @@ namespace kitronik_VIEW128x64 {
         let b = 1 ? (_screen[ind] | (1 << shift_page)) : clrbit(_screen[ind], shift_page)
         _screen[ind] = b
         set_pos(x, page)
-        //if (_ZOOM) {
-        //    _screen[ind + 1] = b
-        //    _buf3[0] = 0x40
-        //    _buf3[1] = _buf3[2] = b
-        //    pins.i2cWriteBuffer(displayAddress, _buf3)
-        //}
-        //else {
-            _buf2[0] = 0x40
-            _buf2[1] = b
-            pins.i2cWriteBuffer(displayAddress, _buf2)
-       // }
+        _buf2[0] = 0x40
+        _buf2[1] = b
+        pins.i2cWriteBuffer(displayAddress, _buf2)
+    }
+
+    /**
+     * Using the X Y co-ordinates, it is possible to turn on a selected pixel on the display
+     * @param x is X alis, eg: 0
+     * @param y is Y alis, eg: 0
+     * @param screen is screen selection when using multiple screens
+     */
+    //% blockId="VIEW128x64_clear_pixel" block="clear pixel at x %x|y %y"
+    //% group="Show"
+    //% weight=70 blockGap=8
+    //% x.min=0, x.max=127
+    //% y.min=0, y.max=63
+    //% inlineInputMode=inline
+    export function clearPixel(x: number, y: number, screen?: 1) {
+
+        displayAddress = setScreenAddr(screen)
+
+        let page = y >> 3
+        let shift_page = y % 8
+        //let ind = x * (_ZOOM + 1) + page * 128 + 1
+        let ind = x + page * 128 + 1
+        let b = 0 ? (_screen[ind] | (1 << shift_page)) : clrbit(_screen[ind], shift_page)
+        _screen[ind] = b
+        set_pos(x, page)
+        _buf2[0] = 0x40
+        _buf2[1] = b
+        pins.i2cWriteBuffer(displayAddress, _buf2)
     }
 
 
@@ -492,18 +512,6 @@ namespace kitronik_VIEW128x64 {
     //% len.min=1, len.max=127
     //% inlineInputMode=inline
     export function drawLine(lineDirection: LineDirectionSelection, len: number, x: number, y: number, screen?: 1) {
-        //if (_ZOOM){
-        //    if (x > 63)
-        //        x = 63
-        //    if (y > 31)
-        //        y = 31
-        //}
-        //else {
-        //    if (x > 127)
-        //        x = 127
-        //    if (y > 63)
-        //        y = 63
-        //}
         if (lineDirection == LineDirectionSelection.horiztonal){
             for (let i = x; i < (x + len); i++)
                 setPixel(i, y, screen)
@@ -534,20 +542,7 @@ namespace kitronik_VIEW128x64 {
     //% height.min=1 height.max=63
     //% x.min=0 x.max=127
     //% y.min=0 y.max=63
-    export function drawRect(width: number, height: number, x: number, y: number, screen?: 1) {
-        //if (_ZOOM){
-        //    if (x > 63)
-        //        x = 63
-        //    if (y > 31)
-        //        y = 31
-        //}
-        //else {
-        //    if (x > 127)
-        //        x = 127
-        //    if (y > 63)
-        //        y = 63
-        //}
-        
+    export function drawRect(width: number, height: number, x: number, y: number, screen?: 1) {        
         if (!x)     //if variable x has not been used, default to x position of 0
             x=0
         
