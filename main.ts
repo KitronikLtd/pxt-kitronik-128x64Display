@@ -137,26 +137,6 @@ namespace kitronik_VIEW128x64 {
 
 
     /**
-     * Selecting display
-     */
-    //export enum DisplaySelection {
-    //    //% block="1"
-    //    displayOne = 1,
-    //    //% block="2"
-    //    displayTwo = 2
-    //}
-
-    ///**
-    // * Selecting graph type
-    // */
-    //export enum GraphSelection {
-    //    //% block="scrolling"
-    //    scrolling,
-    //    //% block="static"
-    //    stationary
-    //}
-
-    /**
      * Select the alignment of text
      */
     export enum ShowAlign {
@@ -177,16 +157,6 @@ namespace kitronik_VIEW128x64 {
         //% block="vertical"
         vertical
     }
-
-    /**
-     * Selecting zoom option
-     */
-    //export enum ZoomSelection {
-    //    //% block="in"
-    //    zoomIn = 1,
-    //    //% block="out"
-    //    zoomOut = 0
-    //}
 
     //Screen buffers for sending data to the display
     let screenBuf = pins.createBuffer(1025);
@@ -346,7 +316,7 @@ namespace kitronik_VIEW128x64 {
      * @param screen is screen selection when using multiple screens
      */
     //% blockId="VIEW128x64_clear_pixel" block="clear pixel at x %x|y %y"
-    //% group="Show"
+    //% group="Delete"
     //% weight=70 blockGap=8
     //% x.min=0, x.max=127
     //% y.min=0, y.max=63
@@ -371,7 +341,7 @@ namespace kitronik_VIEW128x64 {
 
     /**
      * show will allow any number, string or variable to be displayed onto the screen.
-     * Additional selection of where the data is to be shown  is used
+     * Block is expandable to set line and alignment
      * @param displayShowAlign is the alignment of the text, this can be left, centre or right
      * @param line is line the text to be started on, eg: 1
      * @param inputData is the text will be show
@@ -510,11 +480,11 @@ namespace kitronik_VIEW128x64 {
     }
  
     /**
-     * draw a line using the x and y co-ordinates as a starting point and then a given length
+     * draw a line using the x and y co-ordinates as a starting point to a given length
      * @param lineDirection is the selection of either horizontal line, vertical line or diaganol
      * @param x is start position on the X axis, eg: 0
      * @param y is start position on the Y axis, eg: 0
-     * @param len is the length of line, eg: 10
+     * @param len is the length of line, length is the number of pixels, eg: 10
      * @param screen is screen selection when using multiple screens
      */
     //% blockId="VIEW128x64_draw_line" block="draw a %lineDirection | line with length of %len starting at x %x|y %y"
@@ -571,7 +541,7 @@ namespace kitronik_VIEW128x64 {
      * clear screen
      * @param screen is screen selection when using multiple screens
      */
-    //% blockId="VIEW128x64_clear" block="clear display ||%screen"
+    //% blockId="VIEW128x64_clear" block="clear display"
     //% group="Delete"
     //% weight=63 blockGap=8
     export function clear(screen?: number) {
@@ -587,7 +557,7 @@ namespace kitronik_VIEW128x64 {
     }
 
     /**
-     * Turn display on and off, information on the screen will be kept when display is turned off and then back on
+     * Turn display on and off. The information on the screen will be kept when display when turning on and off
      * @param output is the boolean output of the pin, either ON or OFF
      * @param screen is screen selection when using multiple screens
      */
@@ -714,59 +684,6 @@ namespace kitronik_VIEW128x64 {
     //      Expert blocks
     //
     //////////////////////////////////////
-
-
-    /**
-     * show text in OLED
-     * @param x is X axis position, eg: 0
-     * @param y is Y axis position, eg: 1
-     * @param s is the variable or number or text that will be shown on the display
-     * @param screen is screen selection when using multiple screens
-     */
-    //% blockId="VIEW128x64_show_at_position" block="show %inputData shifted by %x|on line %y"
-    //% subcategory=advanced
-    //% group="Show"
-    //% weight=80 blockGap=8
-    //% y.min = 1
-    export function showString(inputData: any, x: number, y: number, screen?: 1) {
-        displayAddress = setScreenAddr(screen)
-        if (initalised == 0){
-            initDisplay(1)
-        }
-            
-        let s = convertToText(inputData)
-
-        if (y=0){//if variable y has not been used, default to y position of 0
-            y=0
-        }
-        else{
-            y = y-1
-        }
-
-        let col = 0
-        let p = 0
-        let ind = 0
-        for (let n = 0; n < s.length; n++) {
-            p = font[s.charCodeAt(n)]
-            for (let i = 0; i < 5; i++) {
-                col = 0
-                for (let j = 0; j < 5; j++) {
-                    if (p & (1 << (5 * i + j)))
-                        col |= (1 << (j + 1))
-                }
-                ind = (x + n) * 5 + y * 128 + i + 1
-                screenBuf[ind] = col
-                //if (_ZOOM)
-                //    _screen[ind + 1] = col
-            }
-        }
-        set_pos(x * 5, y)
-        let ind0 = x * 5 + y * 128
-        let buf = screenBuf.slice(ind0, ind + 1)
-        buf[0] = 0x40
-        pins.i2cWriteBuffer(displayAddress, buf)
-    }
-
 
     /**
      * Block will update or efresh the screen if any data has been changed
