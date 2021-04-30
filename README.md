@@ -86,14 +86,6 @@ kitronik_VIEW128x64.refresh()
 ```
 Refresh will update the display with any new data that has been stored in the display memory buffer.
 
-The main block for driving the Piano returns a true or false statement after checking whether a particular capacitive touch key has been pressed.
-This block works best when inserted as the boolean test in 'if' blocks. The music blocks can then be used to create an output through the speaker:
-```blocks
-if (Kitronik_Piano.keyIsPressed(Kitronik_Piano.PianoKeyAddresses.PIANO_ID_KEY_K9)) {
-        music.playTone(262, music.beat(BeatFraction.Whole))
-}
-```
-
 ## License
 
 MIT
