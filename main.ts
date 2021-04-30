@@ -139,22 +139,22 @@ namespace kitronik_VIEW128x64 {
     /**
      * Selecting display
      */
-    export enum DisplaySelection {
-        //% block="1"
-        displayOne = 1,
-        //% block="2"
-        displayTwo = 2
-    }
+    //export enum DisplaySelection {
+    //    //% block="1"
+    //    displayOne = 1,
+    //    //% block="2"
+    //    displayTwo = 2
+    //}
 
-    /**
-     * Selecting graph type
-     */
-    export enum GraphSelection {
-        //% block="scrolling"
-        scrolling,
-        //% block="static"
-        stationary
-    }
+    ///**
+    // * Selecting graph type
+    // */
+    //export enum GraphSelection {
+    //    //% block="scrolling"
+    //    scrolling,
+    //    //% block="static"
+    //    stationary
+    //}
 
     /**
      * Select the alignment of text
@@ -191,11 +191,14 @@ namespace kitronik_VIEW128x64 {
     //Screen buffers for sending data to the display
     let screenBuf = pins.createBuffer(1025);
     let ackBuf = pins.createBuffer(2);
-    let _buf2 = pins.createBuffer(2);
-    let _buf3 = pins.createBuffer(3);
-    let _buf4 = pins.createBuffer(4);
+    let writeOneByteBuf = pins.createBuffer(2);
+    let writeTwoByteBuf = pins.createBuffer(3);
+    let writeThreeByteBuf = pins.createBuffer(4);
 
-    let initalised = false    		//a flag to indicate automatic initalising the display
+    let initalised = 0    		//a flag to indicate automatic initalising the display
+
+    //Constants for Display
+    let NUMBER_OF_CHAR_PER_LINE = 27
 
     //default address forthe display
     let DISPLAY_ADDR_1 = 60
@@ -215,29 +218,29 @@ namespace kitronik_VIEW128x64 {
     let GRAPH_Y_MIN_LOCATION = 63
     let GRAPH_Y_MAX_LOCATION = 20
     let previousYPlot = 0
-    let previousLen = 0
 
     //function write one byte of data to the display
     function writeOneByte(regValue: number) {
-        let n = regValue % 256;
-        pins.i2cWriteNumber(displayAddress, n, NumberFormat.UInt16BE);
+        writeOneByteBuf[0] = 0;
+        writeOneByteBuf[1] = regValue;
+        pins.i2cWriteBuffer(displayAddress, writeOneByteBuf);
     }
 
     //function write two byte of data to the display
     function writeTwoByte(regValue1: number, regValue2: number) {
-        _buf3[0] = 0;
-        _buf3[1] = regValue1;
-        _buf3[2] = regValue2;
-        pins.i2cWriteBuffer(displayAddress, _buf3);
+        writeTwoByteBuf[0] = 0;
+        writeTwoByteBuf[1] = regValue1;
+        writeTwoByteBuf[2] = regValue2;
+        pins.i2cWriteBuffer(displayAddress, writeTwoByteBuf);
     }
 
     //function write three byte of data to the display
     function writeThreeByte(regValue1: number, regValue2: number, regValue3: number) {
-        _buf4[0] = 0;
-        _buf4[1] = regValue1;
-        _buf4[2] = regValue2;
-        _buf4[3] = regValue3;
-        pins.i2cWriteBuffer(displayAddress, _buf4);
+        writeThreeByteBuf[0] = 0;
+        writeThreeByteBuf[1] = regValue1;
+        writeThreeByteBuf[2] = regValue2;
+        writeThreeByteBuf[3] = regValue3;
+        pins.i2cWriteBuffer(displayAddress, writeThreeByteBuf);
     }
 
     function set_pos(col: number = 0, page: number = 0) {
@@ -247,20 +250,20 @@ namespace kitronik_VIEW128x64 {
     }
 
     // clear bit
-    function clrbit(d: number, b: number): number {
+    function clearBit(d: number, b: number): number {
         if (d & (1 << b))
             d -= (1 << b)
         return d
     }
 
     // sorts the value and return the correct address
-    function setScreenAddr(selection: any): number {
+    function setScreenAddr(selection: number): number {
         let addr = 0
-        if (selection == DisplaySelection.displayTwo){
-            addr = DISPLAY_ADDR_2
-        }   
-        else if (selection == DisplaySelection.displayOne){
+        if (selection == 1){
             addr = DISPLAY_ADDR_1
+        }   
+        else if (selection == 2){
+            addr = DISPLAY_ADDR_2
         }
         else {
             addr = DISPLAY_ADDR_1
@@ -272,20 +275,17 @@ namespace kitronik_VIEW128x64 {
      * Setup of display ready for using
      * @param screen is the selection of which screen to initialise
      */
-    //% blockId="VIEW128x64_init" block="setup display"
-    //% group="Control"
-    //% weight=100 blockGap=8
-    export function init(screen?: 1) {
+    export function init(screen?: number): void {
         
         displayAddress = setScreenAddr(screen)
         //load the ackBuffer to check is there is a display there before starting initalising of ths display
-        //ackBuf[0] = 0
-        //ackBuf[1] = 0xAF
-        //let ack = pins.i2cWriteBuffer(displayAddress, ackBuf)
-        //if (ack == -1010){ //ifvalue return back is -1010, there is no display and show error message
-        //    basic.showString("ERROR - no display")
-        //}
-        //else{   //start initalising of the display
+        ackBuf[0] = 0
+        ackBuf[1] = 0xAF
+        let ack = pins.i2cWriteBuffer(displayAddress, ackBuf)
+        if (ack == -1010){ //ifvalue return back is -1010, there is no display and show error message
+            basic.showString("ERROR - no display")
+        }
+        else{   //start initalising of the display
             writeOneByte(0xAE)       // SSD1306_DISPLAYOFF
             writeOneByte(0xA4)       // SSD1306_DISPLAYALLON_RESUME
             writeTwoByte(0xD5, 0xF0) // SSD1306_SETDISPLAYCLOCKDIV
@@ -306,8 +306,8 @@ namespace kitronik_VIEW128x64 {
             writeTwoByte(0xD6, 0)    // zoom is set to off
             writeOneByte(0xAF)       // SSD1306_DISPLAYON
             clear()
-            //_ZOOM = 0
-            initalised = true
+            initalised = 1
+        }
     }
 
     /**
@@ -323,21 +323,20 @@ namespace kitronik_VIEW128x64 {
     //% y.min=0, y.max=63
     //% inlineInputMode=inline
     export function setPixel(x: number, y: number, screen?: 1) {
-
         displayAddress = setScreenAddr(screen)
-        //if (initalised == false)
-        //    init()
+        if (initalised == 0){
+            init()
+        }
 
-        let page = y >> 3
-        let shift_page = y % 8
-        //let ind = x * (_ZOOM + 1) + page * 128 + 1
-        let ind = x + page * 128 + 1
-        let b = 1 ? (screenBuf[ind] | (1 << shift_page)) : clrbit(screenBuf[ind], shift_page)
-        screenBuf[ind] = b
-        set_pos(x, page)
-        _buf2[0] = 0x40
-        _buf2[1] = b
-        pins.i2cWriteBuffer(displayAddress, _buf2)
+        let page = y >> 3                                       
+        let shift_page = y % 8                                  //calculate the page to write to
+        let ind = x + page * 128 + 1                            //calculate which register in the page to write to.
+        let screenPixel = (screenBuf[ind] | (1 << shift_page))  //set the screen data byte
+        screenBuf[ind] = screenPixel                            //store data in screen buffer
+        set_pos(x, page)                                        //set the position on the screen to write at 
+        writeOneByteBuf[0] = 0x40                               //load buffer with command
+        writeOneByteBuf[1] = screenPixel                        //load buffer with byte
+        pins.i2cWriteBuffer(displayAddress, writeOneByteBuf)    //send data to screen
     }
 
     /**
@@ -353,21 +352,20 @@ namespace kitronik_VIEW128x64 {
     //% y.min=0, y.max=63
     //% inlineInputMode=inline
     export function clearPixel(x: number, y: number, screen?: 1) {
-
         displayAddress = setScreenAddr(screen)
-        //if (initalised == false)
-        //    init()
+        if (initalised == 0){
+            init()
+        }   
 
         let page = y >> 3
-        let shift_page = y % 8
-        //let ind = x * (_ZOOM + 1) + page * 128 + 1
-        let ind = x + page * 128 + 1
-        let b = 0 ? (screenBuf[ind] | (1 << shift_page)) : clrbit(screenBuf[ind], shift_page)
-        screenBuf[ind] = b
-        set_pos(x, page)
-        _buf2[0] = 0x40
-        _buf2[1] = b
-        pins.i2cWriteBuffer(displayAddress, _buf2)
+        let shift_page = y % 8                                  //calculate the page to write to
+        let ind = x + page * 128 + 1                            //calculate which register in the page to write to.
+        let screenPixel = clearBit(screenBuf[ind], shift_page)  //clear the screen data byte
+        screenBuf[ind] = screenPixel                            //store data in screen buffer
+        set_pos(x, page)                                        //set the position on the screen to write at 
+        writeOneByteBuf[0] = 0x40                               //load buffer with command
+        writeOneByteBuf[1] = screenPixel                        //load buffer with byte
+        pins.i2cWriteBuffer(displayAddress, writeOneByteBuf)    //send data to screen
     }
 
 
@@ -388,12 +386,12 @@ namespace kitronik_VIEW128x64 {
     export function show(inputData: any,  line?: number, displayShowAlign?: ShowAlign, screen?: 1) {
         let y = 0
         let x = 0
-        let numberOfCharOnLine = 14
-        let s = convertToText(inputData)
+        let inputString = convertToText(inputData)
         displayAddress = setScreenAddr(screen)
-        //if (initalised == false)
-        //    init()
-
+        if (initalised == 0){
+            init()
+        }
+            
         if (!displayShowAlign){//if variable y has not been used, default to y position of 0
             displayShowAlign=ShowAlign.Left
         }
@@ -405,11 +403,9 @@ namespace kitronik_VIEW128x64 {
         else{
             y = (line-1)
         }
-        
-        numberOfCharOnLine = 27
 
         //sort text into lines
-        let lengthOfText = s.length
+        let lengthOfText = inputString.length
         let textLoop = 0
         let wordArray: string[] = []
         let wordLengthArray: number[] = []
@@ -421,16 +417,17 @@ namespace kitronik_VIEW128x64 {
         let word = 0
         let createString = ""
 
-        for (textLoop = 0; textLoop <= s.length; textLoop++) {
-            if (s.charAt(textLoop) == " ") {
-                let splitStr = s.substr(startOfNewWord, (textLoop - (startOfNewWord - 1)))
+        //for loop takes the input string and splits into single words by checking for spaces
+        for (textLoop = 0; textLoop <= inputString.length; textLoop++) {
+            if (inputString.charAt(textLoop) == " ") {
+                let splitStr = inputString.substr(startOfNewWord, (textLoop - (startOfNewWord - 1)))
                 wordArray[numberOfWords] = splitStr
                 wordLengthArray[numberOfWords] = splitStr.length
                 numberOfWords += 1
                 startOfNewWord = textLoop + 1
             }
-            else if (textLoop == s.length) {
-                let splitStr = s.substr(startOfNewWord, (textLoop - (startOfNewWord - 1)))
+            else if (textLoop == inputString.length) {
+                let splitStr = inputString.substr(startOfNewWord, (textLoop - (startOfNewWord - 1)))
                 wordArray[numberOfWords] = splitStr + " "
                 wordLengthArray[numberOfWords] = splitStr.length + 1
                 numberOfWords += 1
@@ -446,7 +443,7 @@ namespace kitronik_VIEW128x64 {
                 stringArray[numberOfStrings] = createString
                 numberOfStrings += 1
             }
-            else if ((screenLine + wordLengthArray[textLoop]) <= numberOfCharOnLine) {  //check the current string length plus the next word legnth will fit on the LCD line
+            else if ((screenLine + wordLengthArray[textLoop]) <= NUMBER_OF_CHAR_PER_LINE) {  //check the current string length plus the next word legnth will fit on the LCD line
                 createString = createString + wordArray[textLoop]               //if it does, add it to the string
                 screenLine = createString.length                                //increase the displayed string length to check ready for next word
             }
@@ -459,58 +456,54 @@ namespace kitronik_VIEW128x64 {
         }
 
         let col = 0
-        let p = 0
+        let charDisplayBytes = 0
         let ind = 0
         
         //add for loop for lines
         for (let textLine = 0; textLine <= (numberOfStrings-1); textLine++)
         {
-            s = stringArray[textLine]
+            inputString = stringArray[textLine]
             
-            if (s.length < numberOfCharOnLine)
+            if (inputString.length < NUMBER_OF_CHAR_PER_LINE)
             {
-                while(s.length < numberOfCharOnLine){
+                while(inputString.length < NUMBER_OF_CHAR_PER_LINE){    //Loop will add white spaces on side of string depending on which alignment
                     if (displayShowAlign == ShowAlign.Left){
-                        s = s + " "
+                        inputString = inputString + " "
                     }
                     else if (displayShowAlign == ShowAlign.Centre){
-                        if (s.length % 2 == 0){
-                            s = " " + s + " "
+                        if (inputString.length % 2 == 0){
+                            inputString = " " + inputString + " "
                         }
                         else {
-                            s = s + " "
+                            inputString = inputString + " "
                         }
                     } 
                     else if (displayShowAlign == ShowAlign.Right){
-                        s = " " + s
+                        inputString = " " + inputString
                     }
                 }
                  
             }
 
-            for (let n = 0; n < s.length; n++) {
-                p = font[s.charCodeAt(n)]
-                for (let i = 0; i < 5; i++) {
+            for (let charOfString = 0; charOfString < inputString.length; charOfString++) {
+                charDisplayBytes = font[inputString.charCodeAt(charOfString)]
+                for (let i = 0; i < 5; i++) {  //for loop will take byte font array and load it into the correct register, the shift to the next byte to load into the next location
                     col = 0
                     for (let j = 0; j < 5; j++) {
-                        if (p & (1 << (5 * i + j)))
+                        if (charDisplayBytes & (1 << (5 * i + j)))
                             col |= (1 << (j + 1))
                     }
-                    //ind = (x + n) * 5 * (_ZOOM + 1) + y * 128 + i * (_ZOOM + 1) + 1
-                    ind = (x + n) * 5 + y * 128 + i + 1
-                    //if (color == 0)
-                        //col = 255 - col
+
+                    ind = (x + charOfString) * 5 + y * 128 + i + 1
                     screenBuf[ind] = col
-                    //if (_ZOOM)
-                    //    _screen[ind + 1] = col
                 }
             }
-            set_pos(x * 5, y)
-            //let ind0 = x * 5 * (_ZOOM + 1) + y * 128
+
+            set_pos(x * 5, y)                               //set the start position to write to
             let ind0 = x * 5 + y * 128
             let buf = screenBuf.slice(ind0, ind + 1)
             buf[0] = 0x40
-            pins.i2cWriteBuffer(displayAddress, buf)
+            pins.i2cWriteBuffer(displayAddress, buf)        //send data to the screen
             y += 1 
         }
 
@@ -533,15 +526,14 @@ namespace kitronik_VIEW128x64 {
     //% inlineInputMode=inline
     export function drawLine(lineDirection: LineDirectionSelection, len: number, x: number, y: number, screen?: 1) {
         if (lineDirection == LineDirectionSelection.horiztonal){
-            for (let i = x; i < (x + len); i++)
+            for (let i = x; i < (x + len); i++) //loop to set the pixel in the horizontal line
                 setPixel(i, y, screen)
         }
         else if (lineDirection == LineDirectionSelection.vertical){
-            if (len >= 64)
-            {
+            if (len >= 64){          //as length could be max on the x axis, this checks if a vertical lines is draw, max the value to the max of the y axis
                 len = 63
             }
-            for (let i = y; i < (y + len); i++)
+            for (let i = y; i < (y + len); i++) //loop to set the pixel in the vertical line
                 setPixel(x, i, screen)
         }   
     }
@@ -568,7 +560,7 @@ namespace kitronik_VIEW128x64 {
         
         if (!y)     //if variable y has not been used, default to y position of 0
             y=0
-
+        //draw the line of each side of the rectangle
         drawLine(LineDirectionSelection.horiztonal, x, y, width - x + 1, screen)
         drawLine(LineDirectionSelection.horiztonal, x, height, width - x + 1, screen)
         drawLine(LineDirectionSelection.vertical, x, y, height - y + 1, screen)
@@ -582,14 +574,16 @@ namespace kitronik_VIEW128x64 {
     //% blockId="VIEW128x64_clear" block="clear display ||%screen"
     //% group="Delete"
     //% weight=63 blockGap=8
-    export function clear(screen?: DisplaySelection) {
+    export function clear(screen?: number) {
         displayAddress = setScreenAddr(screen)
-        //if (initalised == false)
-        //    init()
-        screenBuf.fill(0)
+        if (initalised == 0){
+            init()
+        }
+            
+        screenBuf.fill(0)       //fill the screenBuf with 0
         screenBuf[0] = 0x40
-        set_pos()
-        pins.i2cWriteBuffer(displayAddress, screenBuf)
+        set_pos()               //set position to the start of the screen
+        pins.i2cWriteBuffer(displayAddress, screenBuf)  //write clear buffer to the screen
     }
 
     /**
@@ -598,20 +592,21 @@ namespace kitronik_VIEW128x64 {
      * @param screen is screen selection when using multiple screens
      */
     //% blockId=VIEW128x64_display_on_off_control
-    //% block="turn %output=on_off_toggle| display"
+    //% block="turn %displayOutput=on_off_toggle| display"
     //% group="Control"
     //% expandableArgumentMode="toggle"
     //% weight=80 blockGap=8
-    export function controlDisplayOnOff(output: boolean, screen?: 1) {
+    export function controlDisplayOnOff(displayOutput: boolean, screen?: 1) {
         displayAddress = setScreenAddr(screen)
-        //if (initalised == false)
-        //    init()
-        
-        if (output == true) {
-            writeOneByte(0xAF)
+        if (initalised == 0){
+            init()
+        }
+            
+        if (displayOutput == true) {
+            writeOneByte(0xAF)      //turn display output on
         }
         else {
-            writeOneByte(0xAE)
+            writeOneByte(0xAE)      //turn display output off
         }
     }
 
@@ -641,14 +636,16 @@ namespace kitronik_VIEW128x64 {
      */
     //% blockId="VIEW128x64_plot_request"
     //% group="Draw"
-    //% block="plot %plotVariable| with a %graphType| action onto display"
+    //% block="plot %plotVariable| onto display"
     //% weight=100 blockGap=8
-    export function plot(plotVariable: number, graphType: GraphSelection, screen?: 1) {
+    export function plot(plotVariable: number, screen?: 1) {
         displayAddress = setScreenAddr(screen)
-        //if (initalised == false)
-        //    init()
+        if (initalised == 0){
+            init()
+        }
+            
         let plotLength = plotArray.length
-        if (plotLength == 127){
+        if (plotLength == 127){     //if the length of the array has reach max number of pixels, shift the array and remove the oldest
             plotArray.shift()
         }
         //round the variable to use as ints rather than floats
@@ -666,14 +663,15 @@ namespace kitronik_VIEW128x64 {
         for (let arrayPosition = 0; arrayPosition <= plotLength; arrayPosition++) {
     	    let x = arrayPosition//x is start of screen 
             let yPlot = plotArray[arrayPosition]
+            //map the variables to scale between the min and max values to the min and max graph pixel area
             yPlot = pins.map(yPlot, graphYMin, graphYMax, GRAPH_Y_MIN_LOCATION, GRAPH_Y_MAX_LOCATION)
-            //vline(x, yPlot, (GRAPH_Y_MIN_LOCATION-yPlot), screen) // solid graph line
 
             if (arrayPosition == 0){
                 previousYPlot = yPlot
             }
             let y = 0
             let len = 0
+
             //determine if the line needs to be drawn from the last point to the new or visa-versa, V line can only be drawn down the screen
             if (yPlot < previousYPlot){
                 y = yPlot
@@ -687,43 +685,31 @@ namespace kitronik_VIEW128x64 {
                 y = yPlot
                 len = 1
             }
-            //Clear plots
+
+            //Clear plots in screenBuffer
             let page = 0
-            for (let i = GRAPH_Y_MAX_LOCATION; i < GRAPH_Y_MIN_LOCATION; i++){
+            for (let i = GRAPH_Y_MAX_LOCATION; i <= GRAPH_Y_MIN_LOCATION; i++){
                 page = i >> 3
                 let shift_page = i % 8
-                //let ind = x * (_ZOOM + 1) + page * 128 + 1
                 let ind = x + page * 128 + 1
-                let b = 0 ? (screenBuf[ind] | (1 << shift_page)) : clrbit(screenBuf[ind], shift_page)
-                screenBuf[ind] = b
-                //set_pos(x, page)
-                //pins.i2cWriteBuffer(displayAddress, screenBuf)
+                let screenPixel = clearBit(screenBuf[ind], shift_page)    //clear the screen data byte
+                screenBuf[ind] = screenPixel                            //store data in screen buffer
             }
 
-            //refresh()
-            //new plots
-            //page = 0
+            //plot new data in screenBuffer
             for (let i = y; i < (y + len); i++){
                 page = i >> 3
                 let shift_page = i % 8
-                //let ind = x * (_ZOOM + 1) + page * 128 + 1
                 let ind = x + page * 128 + 1
-                let b = 1 ? (screenBuf[ind] | (1 << shift_page)) : clrbit(screenBuf[ind], shift_page)
-                screenBuf[ind] = b
+                let screenPixel = (screenBuf[ind] | (1 << shift_page))  //set the screen data byte
+                screenBuf[ind] = screenPixel                            //store data in screen buffer
             }
-            //setPixel(x, i)
             previousYPlot = yPlot
-            previousLen = len
         }
-        refresh()
-        //if (plotLength == 127){
-        //    if (graphType == GraphSelection.stationary){
-        //        previousYPlot = 0
-        //        plotArray = []
-        //    }
-        //    clear(screen)
-        //}
+        refresh() //refresh screen with new data in screenBuffer
     }
+
+
     //////////////////////////////////////
     //
     //      Expert blocks
@@ -745,8 +731,10 @@ namespace kitronik_VIEW128x64 {
     //% y.min = 1
     export function showString(inputData: any, x: number, y: number, screen?: 1) {
         displayAddress = setScreenAddr(screen)
-        //if (initalised == false)
-         //   init()
+        if (initalised == 0){
+            init()
+        }
+            
         let s = convertToText(inputData)
 
         if (y=0){//if variable y has not been used, default to y position of 0
@@ -791,8 +779,10 @@ namespace kitronik_VIEW128x64 {
     //% weight=63 blockGap=8
     export function refresh(screen?: 1) {
         displayAddress = setScreenAddr(screen)
-        //if (initalised == false)
-        //    init()
+        if (initalised == 0){
+            init()
+        }
+            
         set_pos()
         pins.i2cWriteBuffer(displayAddress, screenBuf)
     }
@@ -808,8 +798,10 @@ namespace kitronik_VIEW128x64 {
     export function invert(output: boolean, screen?: 1) {
         let invertRegisterValue = 0
         displayAddress = setScreenAddr(screen)
-        //if (initalised == false)
-        //    init()
+        if (initalised == 0){
+            init()
+        }
+            
         //let n = (output) ? 0xA7 : 0xA6
         if (output == true){
             invertRegisterValue = 0xA7
