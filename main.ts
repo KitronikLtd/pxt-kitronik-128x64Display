@@ -275,7 +275,7 @@ namespace kitronik_VIEW128x64 {
      * Setup of display ready for using
      * @param screen is the selection of which screen to initialise
      */
-    export function init(screen?: number): void {
+    export function initDisplay(screen?: number): void {
         
         displayAddress = setScreenAddr(screen)
         //load the ackBuffer to check is there is a display there before starting initalising of ths display
@@ -305,8 +305,8 @@ namespace kitronik_VIEW128x64 {
             writeOneByte(0xA6)       // SSD1306_NORMALDISPLAY
             writeTwoByte(0xD6, 0)    // zoom is set to off
             writeOneByte(0xAF)       // SSD1306_DISPLAYON
-            clear()
             initalised = 1
+            clear()
         }
     }
 
@@ -325,7 +325,7 @@ namespace kitronik_VIEW128x64 {
     export function setPixel(x: number, y: number, screen?: 1) {
         displayAddress = setScreenAddr(screen)
         if (initalised == 0){
-            init()
+            initDisplay()
         }
 
         let page = y >> 3                                       
@@ -354,7 +354,7 @@ namespace kitronik_VIEW128x64 {
     export function clearPixel(x: number, y: number, screen?: 1) {
         displayAddress = setScreenAddr(screen)
         if (initalised == 0){
-            init()
+            initDisplay(1)
         }   
 
         let page = y >> 3
@@ -389,7 +389,7 @@ namespace kitronik_VIEW128x64 {
         let inputString = convertToText(inputData)
         displayAddress = setScreenAddr(screen)
         if (initalised == 0){
-            init()
+            initDisplay(1)
         }
             
         if (!displayShowAlign){//if variable y has not been used, default to y position of 0
@@ -577,7 +577,7 @@ namespace kitronik_VIEW128x64 {
     export function clear(screen?: number) {
         displayAddress = setScreenAddr(screen)
         if (initalised == 0){
-            init()
+            initDisplay(1)
         }
             
         screenBuf.fill(0)       //fill the screenBuf with 0
@@ -599,7 +599,7 @@ namespace kitronik_VIEW128x64 {
     export function controlDisplayOnOff(displayOutput: boolean, screen?: 1) {
         displayAddress = setScreenAddr(screen)
         if (initalised == 0){
-            init()
+            initDisplay(1)
         }
             
         if (displayOutput == true) {
@@ -631,7 +631,6 @@ namespace kitronik_VIEW128x64 {
     /**
      * Plot Request start or stops the plotting of the graph onto the display
      * @plotVariable is the variable that the user requires to be recorded on a graph onto the display
-     * @graphType is where the graph is either set to static (once the plot gets to the end of the screen the it will start clean from the start) or scrolling (graph will shift along the screen)
      * @param screen is screen selection when using multiple screens
      */
     //% blockId="VIEW128x64_plot_request"
@@ -641,7 +640,7 @@ namespace kitronik_VIEW128x64 {
     export function plot(plotVariable: number, screen?: 1) {
         displayAddress = setScreenAddr(screen)
         if (initalised == 0){
-            init()
+            initDisplay(1)
         }
             
         let plotLength = plotArray.length
@@ -732,7 +731,7 @@ namespace kitronik_VIEW128x64 {
     export function showString(inputData: any, x: number, y: number, screen?: 1) {
         displayAddress = setScreenAddr(screen)
         if (initalised == 0){
-            init()
+            initDisplay(1)
         }
             
         let s = convertToText(inputData)
@@ -780,7 +779,7 @@ namespace kitronik_VIEW128x64 {
     export function refresh(screen?: 1) {
         displayAddress = setScreenAddr(screen)
         if (initalised == 0){
-            init()
+            initDisplay(1)
         }
             
         set_pos()
@@ -799,7 +798,7 @@ namespace kitronik_VIEW128x64 {
         let invertRegisterValue = 0
         displayAddress = setScreenAddr(screen)
         if (initalised == 0){
-            init()
+            initDisplay(1)
         }
             
         //let n = (output) ? 0xA7 : 0xA6
