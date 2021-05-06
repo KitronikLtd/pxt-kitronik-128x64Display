@@ -1,5 +1,5 @@
 
-> Open this page at [https://kitronikltd.github.io/pxt-kitronik-128x64display/](https://kitronikltd.github.io/pxt-kitronik-128x64display/)
+# Kitronik :VIEW 128x64 Display for BBC micro:bit
 
 ## Use as Extension
 
@@ -8,32 +8,12 @@ This repository can be added as an **extension** in MakeCode.
 * open [https://makecode.microbit.org/](https://makecode.microbit.org/)
 * click on **New Project**
 * click on **Extensions** under the gearwheel menu
-* search for **https://github.com/kitronikltd/pxt-kitronik-128x64display** and import
+* search for "128x64Display" or enter **https://github.com/kitronikltd/pxt-kitronik-128x64display** and import
 
-## Edit this project ![Build status badge](https://github.com/kitronikltd/pxt-kitronik-128x64display/workflows/MakeCode/badge.svg)
-
-To edit this repository in MakeCode.
-
-* open [https://makecode.microbit.org/](https://makecode.microbit.org/)
-* click on **Import** then click on **Import URL**
-* paste **https://github.com/kitronikltd/pxt-kitronik-128x64display** and click import
-
-## Blocks preview
-
-This image shows the blocks code from the last commit in master.
-This image may take a few minutes to refresh.
-
-![A rendered view of the blocks](https://github.com/kitronikltd/pxt-kitronik-128x64display/raw/master/.github/makecode/blocks.png)
-
-#### Metadata (used for search, rendering)
-
-* for PXT/microbit
-<script src="https://makecode.com/gh-pages-embed.js"></script><script>makeCodeRender("{{ site.makecode.home_url }}", "{{ site.github.owner_name }}/{{ site.github.repository_name }}");</script>
-
-
-# pxt-kitronik-128x64Display
+# pxt-kitronik-128x64Display Blocks
 
 Custom blocks for www.kitronik.co.uk/56115 :VIEW 128x64 Display for BBC micro:bit.  There are easy to use blocks to take full usage of the display
+Below are a list of the different blocks and their functions.
 
 ## show()
 ```blocks
@@ -61,25 +41,39 @@ Clear Pixel will clear a a particular pixel from an X-Y co-ordinates. Range for 
 
 ## drawLine()
 ```blocks
-kitronik_VIEW128x64.drawLine(16)
+kitronik_VIEW128x64.drawLine(kitronik_VIEW128x64.LineDirectionSelection.horiztonal, 10, 0, 0)
 ```
+Draw line will  give the option of drawing vertical or horiztonal line on screen.  The required parameters needed are the length (which is the number of pixels) followed by an X-Y co-ordinates.
+The length is between 0-127, if a vertical line is required any number over 63 will be limited to 63
+Range for the X is 0-127, range for the Y is 0-63
+
 ## drawRect()
 ```blocks
-kitronik_VIEW128x64.drawRect(16)
+kitronik_VIEW128x64.drawRect(60, 30, 0, 0)
 ```
+Draw line will  give the option of drawing rectangle shape on screen.  The required parameters needed are the width and height (which is the number of pixels) followed by an X-Y co-ordinates.
+Range for the X is 0-127, range for the Y is 0-63
+
 ## plot()
 ```blocks
-kitronik_VIEW128x64.plot(16)
+basic.forever(function () {
+    kitronik_VIEW128x64.plot(input.rotation(Rotation.Pitch))
+})
 ```
+The input for the Plot block is a number input.  The block will take into account any scaling of the graph on screen.  THe block must be called when a new or updated value is wanting to be plotted to the graph.
+This would be ideally be used in a loop
+
 ## controlDisplayOnOff()
 ```blocks
-kitronik_VIEW128x64.controlDisplayOnOff(16)
+kitronik_VIEW128x64.controlDisplayOnOff(kitronik_VIEW128x64.onOff(false))
 ```
+The control display block, allow the user to switch the information on the screen on and off.  This does not remove any data, it only stops displaying the whole screen.
 ## invert()
 ```blocks
 kitronik_VIEW128x64.invert(16)
 ```
 Invert will change the colours of the screen from either white pixels on a black screen, or black pixels on a white screen
+
 ## refresh()
 ```blocks
 kitronik_VIEW128x64.refresh()
