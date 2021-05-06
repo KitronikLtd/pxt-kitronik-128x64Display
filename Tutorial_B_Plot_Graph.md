@@ -8,7 +8,7 @@
 Learn how to plot readings on the Kitronik :VIEW 128x64 Display to draw a graph. 
 Make sure that the BBC micro:bit is plugged into the :VIEW 128x64 Display and a micro USB is connected to the BBC micro:bit.
 Once the hardware is setup, we can advance to the code.
-![Accessbit image](https://KitronikLtd.github.io/pxt-kitronik-accessbit/assets/accessbit-angle.png)
+![128x64Display image](https://KitronikLtd.github.io/pxt-kitronik-128x64Display/assets/128x64Display.png)
 
 ### Starting up the Display @unplugged
 There is no setup required for the :VIEW 128x64 Display.  Once the first block is place, it will detect the display and do the required setup for you.  
@@ -17,7 +17,7 @@ We can now look into how to get information onto the display.
 The graph that will be plotting will have the current reading shown in the display as well as the graph being plotted.
 
 ## Plotting data
-### Step 1 @unplugged
+### Step 1
 All the code from this point will be in the ``||basic.forever||`` bracket.  Firstly a variable will be created called ``||RollReading||``.  
 This will take the reading from the accelorometer on the BBC micro:bit.  Add a ``||set.RollReading||`` into the ``||basic.forever||`` bracket.
 #### ~ tutorialhint

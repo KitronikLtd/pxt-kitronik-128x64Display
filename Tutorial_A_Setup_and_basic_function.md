@@ -8,7 +8,7 @@
 Learn how to use the Kitronik :VIEW 128x64 Display and create blocks to take full advantage of the display. 
 Make sure that the BBC micro:bit is plugged into the :VIEW 128x64 Display and a micro USB is connected to the BBC micro:bit.
 Once the hardware is setup, we can advance to the code.
-![Accessbit image](https://KitronikLtd.github.io/pxt-kitronik-accessbit/assets/accessbit-angle.png)
+![128x64Display image](https://KitronikLtd.github.io/pxt-kitronik-128x64Display/assets/128x64Display.png)
 
 
 ### Starting up the Display @unplugged
