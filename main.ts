@@ -510,13 +510,13 @@ namespace kitronik_VIEW128x64 {
 
     /**
      * Draw a rectangle using the X and Y coordiantes as a starting point, then the width and height can be enter as the number of pixels
-     * @param width is length of the rectange, eg: 60
-     * @param height is height of the rectange, eg: 30
+     * @param width is width of the rectangle, eg: 60
+     * @param height is height of the rectangle, eg: 30
      * @param x is the start position on the X axis, eg: 0
      * @param y is the start position on the Y axis, eg: 0
      * @param screen is screen selection when using multiple screens
      */
-    //% blockId="VIEW128x64_draw_rect" block="draw a rectangle wide %width|high %height|from position x %x|y %y"
+    //% blockId="VIEW128x64_draw_rect" block="draw a rectangle %width|wide %height|high from position x %x|y %y"
     //% weight=71 blockGap=8
     //% group="Draw"
     //% inlineInputMode=inline
