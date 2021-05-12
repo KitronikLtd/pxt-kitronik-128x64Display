@@ -531,10 +531,10 @@ namespace kitronik_VIEW128x64 {
         if (!y)     //if variable y has not been used, default to y position of 0
             y=0
         //draw the line of each side of the rectangle
-        drawLine(LineDirectionSelection.horiztonal, x, y, width - x + 1, screen)
-        drawLine(LineDirectionSelection.horiztonal, x, height, width - x + 1, screen)
-        drawLine(LineDirectionSelection.vertical, x, y, height - y + 1, screen)
-        drawLine(LineDirectionSelection.vertical, width, y, height - y + 1, screen)
+        drawLine(LineDirectionSelection.horiztonal, width, x, y, screen)
+        drawLine(LineDirectionSelection.horiztonal, width, x, y + height, screen)
+        drawLine(LineDirectionSelection.vertical, height, x, y, screen)
+        drawLine(LineDirectionSelection.vertical, height, x + width, y, screen)
     }
 
     /**
