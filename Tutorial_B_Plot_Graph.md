@@ -1,25 +1,25 @@
 ### @activities true
 ### @explicitHints true
 
-# 128x64 Display Tutorial
+# 128x64 Display - Plotting Graphs Tutorial
 
 ## Introduction
 ### Introduction @unplugged
-Learn how to plot readings on the Kitronik :VIEW 128x64 Display to draw a graph. 
-Make sure that the BBC micro:bit is plugged into the :VIEW 128x64 Display and a micro USB is connected to the BBC micro:bit.
+Learn how to plot readings and draw graphs on the Kitronik :VIEW 128x64 Display.  
+Make sure that the BBC micro:bit is plugged into the :VIEW 128x64 Display and a micro USB is connected to the BBC micro:bit.  
 Once the hardware is setup, we can advance to the code.
 ![128x64Display image](https://KitronikLtd.github.io/pxt-kitronik-128x64Display/assets/128x64Display.png)
 
 ### Starting up the Display @unplugged
-There is no setup required for the :VIEW 128x64 Display.  Once the first block is place, it will detect the display and do the required setup for you.  
-This gives the perfect start to get coding straight away with no worries on setting it up.  
+There is no setup required for the :VIEW 128x64 Display. Once the first block is in place, it will detect the display and do the required setup for you. This gives the perfect start to get coding straight away!  
 We can now look into how to get information onto the display.  
-The graph that will be plotting will have the current reading shown in the display as well as the graph being plotted.
+The graph that will be plotted will have the current reading shown on the display as well.
 
 ## Plotting data
 ### Step 1
-All the code from this point will be in the ``||basic.forever||`` bracket.  Firstly a variable will be created called ``||RollReading||``.  
-This will take the reading from the accelorometer on the BBC micro:bit.  Add a ``||set.RollReading||`` into the ``||basic.forever||`` bracket.
+All the code for this tutorial will be in the ``||basic:forever||`` bracket.  
+First, a variable needs to be created called ``||variables:RollReading||``. This will take the reading from the accelerometer on the BBC micro:bit.  
+Add a ``||variables:set RollReading||`` into the ``||basic:forever||`` bracket.
 #### ~ tutorialhint
 ```blocks
 basic.forever(function () {
@@ -28,7 +28,8 @@ basic.forever(function () {
 ```
 
 ### Step 2
-Next will select the ``||input.roll||`` block into the ``||set RollReading||`` block.
+Next, select the ``||input:rotation||`` block from ``||input:Input||`` and drop it into the ``||variables:set RollReading||`` block.  
+Change the drop-down to ``||input:roll||``.
 #### ~ tutorialhint
 ```blocks
 basic.forever(function () {
@@ -37,7 +38,7 @@ basic.forever(function () {
 ```
 
 ### Step 3
-Insert a ``||kitronik_VIEWOLED.Show||`` block next with placing the varbale block ``||RollReading||`` .
+Insert a ``||kitronik_VIEW128x64.show||`` block next and place the ``||variables:RollReading||`` variable block inside.
 #### ~ tutorialhint
 ```blocks
 basic.forever(function () {
@@ -53,8 +54,8 @@ Click ``|Download|`` to program the BBC micro:bit and check your display.  When 
 
 ### Step 5
 We able to seethe current reading from the BBC micro:bit, but there is no history of how the value has changed.
-This is where the ``||kitronik_VIEWOLED.Plot||`` block can be useful.  
-Insert the ``||kitronik_VIEWOLED.Plot||`` and add the varbale block ``||RollReading||``.
+This is where the ``||kitronik_VIEW128x64.plot||`` block can be useful.  
+Insert the ``||kitronik_VIEW128x64.plot||`` and add the varbale block ``||RollReading||``.
 #### ~ tutorialhint
 ```blocks
 basic.forever(function () {

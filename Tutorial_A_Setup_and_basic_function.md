@@ -1,7 +1,7 @@
 ### @activities true
 ### @explicitHints true
 
-# 128x64 Display Tutorial
+# 128x64 Display - Text and Line Drawing Tutorial
 
 ## Introduction
 ### Introduction @unplugged
