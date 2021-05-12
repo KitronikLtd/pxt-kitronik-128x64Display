@@ -509,7 +509,7 @@ namespace kitronik_VIEW128x64 {
     }
 
     /**
-     * draw a rectangle using the X and Y co-ordiantes as a starting point, then the lenght and height can be enter as the number of pixels
+     * Draw a rectangle using the X and Y coordiantes as a starting point, then the width and height can be enter as the number of pixels
      * @param width is length of the rectange, eg: 60
      * @param height is height of the rectange, eg: 30
      * @param x is the start position on the X axis, eg: 0
