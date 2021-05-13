@@ -153,22 +153,22 @@ namespace kitronik_VIEW128x64 {
      */
     export enum LineDirectionSelection {
         //% block="horizontal"
-        horiztonal,
+        horizontal,
         //% block="vertical"
         vertical
     }
 
     //Screen buffers for sending data to the display
-    let screenBuf = pins.createBuffer(1025);
+    let screenBuf = pins.createBuffer(1026); // Changed to 1026 for testing, should be 1025
     let ackBuf = pins.createBuffer(2);
     let writeOneByteBuf = pins.createBuffer(2);
     let writeTwoByteBuf = pins.createBuffer(3);
     let writeThreeByteBuf = pins.createBuffer(4);
 
-    let initalised = 0    		//a flag to indicate automatic initalising the display
+    let initialised = 0    		//a flag to indicate automatic initalising the display
 
     //Constants for Display
-    let NUMBER_OF_CHAR_PER_LINE = 27
+    let NUMBER_OF_CHAR_PER_LINE = 26
 
     //default address forthe display
     let DISPLAY_ADDR_1 = 60
@@ -275,7 +275,7 @@ namespace kitronik_VIEW128x64 {
             writeOneByte(0xA6)       // SSD1306_NORMALDISPLAY
             writeTwoByte(0xD6, 0)    // zoom is set to off
             writeOneByte(0xAF)       // SSD1306_DISPLAYON
-            initalised = 1
+            initialised = 1
             clear()
         }
     }
@@ -294,7 +294,7 @@ namespace kitronik_VIEW128x64 {
     //% inlineInputMode=inline
     export function setPixel(x: number, y: number, screen?: 1) {
         displayAddress = setScreenAddr(screen)
-        if (initalised == 0){
+        if (initialised == 0){
             initDisplay()
         }
 
@@ -323,7 +323,7 @@ namespace kitronik_VIEW128x64 {
     //% inlineInputMode=inline
     export function clearPixel(x: number, y: number, screen?: 1) {
         displayAddress = setScreenAddr(screen)
-        if (initalised == 0){
+        if (initialised == 0){
             initDisplay(1)
         }   
 
@@ -340,8 +340,8 @@ namespace kitronik_VIEW128x64 {
 
 
     /**
-     * show will allow any number, string or variable to be displayed onto the screen.
-     * Block is expandable to set line and alignment
+     * 'show' allows any number, string or variable to be displayed on the screen.
+     * The block is expandable to set the line and alignment.
      * @param displayShowAlign is the alignment of the text, this can be left, centre or right
      * @param line is line the text to be started on, eg: 1
      * @param inputData is the text will be show
@@ -358,11 +358,11 @@ namespace kitronik_VIEW128x64 {
         let x = 0
         let inputString = convertToText(inputData)
         displayAddress = setScreenAddr(screen)
-        if (initalised == 0){
+        if (initialised == 0){
             initDisplay(1)
         }
             
-        if (!displayShowAlign){//if variable y has not been used, default to y position of 0
+        if (!displayShowAlign){
             displayShowAlign=ShowAlign.Left
         }
 
@@ -387,7 +387,7 @@ namespace kitronik_VIEW128x64 {
         let word = 0
         let createString = ""
 
-        //for loop takes the input string and splits into single words by checking for spaces
+        //for loop takes the input string and splits into single words by checking for spaces or end of string
         for (textLoop = 0; textLoop <= inputString.length; textLoop++) {
             if (inputString.charAt(textLoop) == " ") {
                 let splitStr = inputString.substr(startOfNewWord, (textLoop - (startOfNewWord - 1)))
@@ -406,19 +406,19 @@ namespace kitronik_VIEW128x64 {
         textLoop = 0
         let screenLine = 0
 
-        //check the length of words added to string fits on the single line of LCD, if it doesnt start a new line
+        //check the length of words added to string fits on a single line of the display, if it doesn't, start a new line
         for (textLoop = 0; textLoop <= numberOfWords; textLoop++) {
 
             if (textLoop == numberOfWords) {
                 stringArray[numberOfStrings] = createString
                 numberOfStrings += 1
             }
-            else if ((screenLine + wordLengthArray[textLoop]) <= NUMBER_OF_CHAR_PER_LINE) {  //check the current string length plus the next word legnth will fit on the LCD line
+            else if ((screenLine + wordLengthArray[textLoop]) <= NUMBER_OF_CHAR_PER_LINE) {  //check the current string length plus the next word length will fit on the display line
                 createString = createString + wordArray[textLoop]               //if it does, add it to the string
                 screenLine = createString.length                                //increase the displayed string length to check ready for next word
             }
             else {
-                stringArray[numberOfStrings] = createString //save the strings to be displayed on the LCD
+                stringArray[numberOfStrings] = createString //save the strings to be displayed on the display
                 numberOfStrings += 1                        //add the total number of lines to be displayed created
                 createString = wordArray[textLoop]          //start with next word
                 screenLine = wordLengthArray[textLoop]      //start with the next word length             
@@ -452,12 +452,12 @@ namespace kitronik_VIEW128x64 {
                         inputString = " " + inputString
                     }
                 }
-                 
+                
             }
 
             for (let charOfString = 0; charOfString < inputString.length; charOfString++) {
                 charDisplayBytes = font[inputString.charCodeAt(charOfString)]
-                for (let i = 0; i < 5; i++) {  //for loop will take byte font array and load it into the correct register, the shift to the next byte to load into the next location
+                for (let i = 0; i < 5; i++) {  //for loop will take byte font array and load it into the correct register, then shift to the next byte to load into the next location
                     col = 0
                     for (let j = 0; j < 5; j++) {
                         if (charDisplayBytes & (1 << (5 * i + j)))
@@ -468,20 +468,32 @@ namespace kitronik_VIEW128x64 {
                     screenBuf[ind] = col
                 }
             }
-
+            
             set_pos(x * 5, y)                               //set the start position to write to
             let ind0 = x * 5 + y * 128
-            let buf = screenBuf.slice(ind0, ind + 1)
+            //basic.showNumber(0)
+            //basic.showNumber(ind0)
+            //basic.showNumber(ind)
+            let buf = screenBuf.slice(ind0, ind)
+            //basic.showNumber(1)
+            if (y < 7) {
+                //basic.showNumber(2)
+                buf = screenBuf.slice(ind0, ind + 1)
+                y += 1  
+            }
             buf[0] = 0x40
             pins.i2cWriteBuffer(displayAddress, buf)        //send data to the screen
-            y += 1 
+            //basic.showNumber(3)
+            //if (y == 7) {
+            //    break
+            //}
         }
 
     }
  
     /**
-     * draw a line using the x and y co-ordinates as a starting point to a given length
-     * @param lineDirection is the selection of either horizontal line, vertical line or diaganol
+     * Draw a line using the x and y co-rdinates as a starting point to a given length
+     * @param lineDirection is the selection of either horizontal line or vertical line
      * @param x is start position on the X axis, eg: 0
      * @param y is start position on the Y axis, eg: 0
      * @param len is the length of line, length is the number of pixels, eg: 10
@@ -495,7 +507,7 @@ namespace kitronik_VIEW128x64 {
     //% len.min=1, len.max=127
     //% inlineInputMode=inline
     export function drawLine(lineDirection: LineDirectionSelection, len: number, x: number, y: number, screen?: 1) {
-        if (lineDirection == LineDirectionSelection.horiztonal){
+        if (lineDirection == LineDirectionSelection.horizontal){
             for (let i = x; i < (x + len); i++) //loop to set the pixel in the horizontal line
                 setPixel(i, y, screen)
         }
@@ -531,8 +543,8 @@ namespace kitronik_VIEW128x64 {
         if (!y)     //if variable y has not been used, default to y position of 0
             y=0
         //draw the line of each side of the rectangle
-        drawLine(LineDirectionSelection.horiztonal, width, x, y, screen)
-        drawLine(LineDirectionSelection.horiztonal, width, x, y + height, screen)
+        drawLine(LineDirectionSelection.horizontal, width, x, y, screen)
+        drawLine(LineDirectionSelection.horizontal, width, x, y + height, screen)
         drawLine(LineDirectionSelection.vertical, height, x, y, screen)
         drawLine(LineDirectionSelection.vertical, height, x + width, y, screen)
     }
@@ -546,7 +558,7 @@ namespace kitronik_VIEW128x64 {
     //% weight=63 blockGap=8
     export function clear(screen?: number) {
         displayAddress = setScreenAddr(screen)
-        if (initalised == 0){
+        if (initialised == 0){
             initDisplay(1)
         }
             
@@ -568,7 +580,7 @@ namespace kitronik_VIEW128x64 {
     //% weight=80 blockGap=8
     export function controlDisplayOnOff(displayOutput: boolean, screen?: 1) {
         displayAddress = setScreenAddr(screen)
-        if (initalised == 0){
+        if (initialised == 0){
             initDisplay(1)
         }
             
@@ -609,7 +621,7 @@ namespace kitronik_VIEW128x64 {
     //% weight=100 blockGap=8
     export function plot(plotVariable: number, screen?: 1) {
         displayAddress = setScreenAddr(screen)
-        if (initalised == 0){
+        if (initialised == 0){
             initDisplay(1)
         }
             
@@ -695,7 +707,7 @@ namespace kitronik_VIEW128x64 {
     //% weight=63 blockGap=8
     export function refresh(screen?: 1) {
         displayAddress = setScreenAddr(screen)
-        if (initalised == 0){
+        if (initialised == 0){
             initDisplay(1)
         }
             
@@ -714,7 +726,7 @@ namespace kitronik_VIEW128x64 {
     export function invert(output: boolean, screen?: 1) {
         let invertRegisterValue = 0
         displayAddress = setScreenAddr(screen)
-        if (initalised == 0){
+        if (initialised == 0){
             initDisplay(1)
         }
             
@@ -723,7 +735,7 @@ namespace kitronik_VIEW128x64 {
             invertRegisterValue = 0xA7
         }
         else{
-           invertRegisterValue = 0xA7 
+           invertRegisterValue = 0xA6 
         }
         writeOneByte(invertRegisterValue)
     }
