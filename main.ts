@@ -545,7 +545,7 @@ namespace kitronik_VIEW128x64 {
         //let wordLengthArray: number[] = []
         let stringArray: string[] = []
         let numberOfStrings = 0
-        let startOfNewString = 0
+        //let startOfString = 0
         //let charLength = 0
         //let word = 0
         //let createString = ""
@@ -562,29 +562,29 @@ namespace kitronik_VIEW128x64 {
                     if ((spacePoint - startOfString) < NUMBER_OF_CHAR_PER_LINE){        //check if the current location minus start of string is less than number of char on a screen
                         previousSpacePoint = spacePoint                                //remember that point for later
                         if (spaceFinder == inputString.length){
-                            saveString = inputString.substr(startOfNewString, spacePoint)//cut the string from start of word to the last space and store it
+                            saveString = inputString.substr(startOfString, spacePoint)//cut the string from start of word to the last space and store it
                             stringArray[numberOfStrings] = saveString
                             numberOfStrings += 1
-                            basic.showString("A")
-                            basic.showNumber(numberOfStrings)
+                            //basic.showString("A")
+                            //basic.showNumber(numberOfStrings)
                         }
                     }
                     else if ((spacePoint - startOfString) > NUMBER_OF_CHAR_PER_LINE){   //check if the current location minus start of string is greater than number of char on a screen
-                        saveString = inputString.substr(startOfNewString, previousSpacePoint)//cut the string from start of word to the last space and store it
+                        saveString = inputString.substr(startOfString, previousSpacePoint)//cut the string from start of word to the last space and store it
                         stringArray[numberOfStrings] = saveString
-                        startOfNewString = previousSpacePoint + 1                       //set start of new word from last space plus one position
+                        startOfString = previousSpacePoint + 1                       //set start of new word from last space plus one position
                         numberOfStrings += 1                                            //increase the number of strings variable
-                        basic.showString("B")
-                        basic.showNumber(numberOfStrings)
+                        //basic.showString("B")
+                        //basic.showNumber(numberOfStrings)
                     }
                     else if ((spacePoint - startOfString) == NUMBER_OF_CHAR_PER_LINE){  //check if the current location minus start of string is equals than number of char on a screen
-                        saveString = inputString.substr(startOfNewString, spacePoint)
+                        saveString = inputString.substr(startOfString, spacePoint)
                         stringArray[numberOfStrings] = saveString
-                        startOfNewString = spacePoint + 1
+                        startOfString = spacePoint + 1
                         previousSpacePoint = spacePoint
                         numberOfStrings += 1
-                        basic.showString("C")
-                        basic.showNumber(numberOfStrings)
+                        //basic.showString("C")
+                        //basic.showNumber(numberOfStrings)
                     }
                 }
             }
@@ -594,7 +594,7 @@ namespace kitronik_VIEW128x64 {
             numberOfStrings += 1
         }
 
-        basic.showNumber(numberOfStrings)
+        //basic.showNumber(numberOfStrings)
         let col = 0
         let charDisplayBytes = 0
         let ind = 0
@@ -603,7 +603,8 @@ namespace kitronik_VIEW128x64 {
         for (let textLine = 0; textLine <= (numberOfStrings-1); textLine++)
         {
             inputString = stringArray[textLine]
-            
+            //inputString = stringArray[1]
+            basic.showNumber(textLine)
             if (inputString.length < NUMBER_OF_CHAR_PER_LINE)
             {
                 while(inputString.length < (NUMBER_OF_CHAR_PER_LINE-1)){    //Loop will add white spaces on side of string depending on which alignment
