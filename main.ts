@@ -159,7 +159,7 @@ namespace kitronik_VIEW128x64 {
     }
 
     //Screen buffers for sending data to the display
-    let screenBuf = pins.createBuffer(1026); // Changed to 1026 for testing, should be 1025
+    let screenBuf = pins.createBuffer(1025); // Changed to 1026 for testing, should be 1025
     let ackBuf = pins.createBuffer(2);
     let writeOneByteBuf = pins.createBuffer(2);
     let writeTwoByteBuf = pins.createBuffer(3);
@@ -360,9 +360,9 @@ namespace kitronik_VIEW128x64 {
         displayAddress = setScreenAddr(screen)
         if (initialised == 0){
             initDisplay(1)
-        }
+        } 
             
-        if (!displayShowAlign){
+        if (!displayShowAlign){//if variable y has not been used, default to y position of 0
             displayShowAlign=ShowAlign.Left
         }
 
@@ -387,42 +387,48 @@ namespace kitronik_VIEW128x64 {
         let word = 0
         let createString = ""
 
-        //for loop takes the input string and splits into single words by checking for spaces or end of string
-        for (textLoop = 0; textLoop <= inputString.length; textLoop++) {
-            if (inputString.charAt(textLoop) == " ") {
-                let splitStr = inputString.substr(startOfNewWord, (textLoop - (startOfNewWord - 1)))
-                wordArray[numberOfWords] = splitStr
-                wordLengthArray[numberOfWords] = splitStr.length
-                numberOfWords += 1
-                startOfNewWord = textLoop + 1
+        //for loop takes the input string and splits into single words by checking for spaces
+        if (y <= 6){
+            for (textLoop = 0; textLoop <= inputString.length; textLoop++) {
+                if (inputString.charAt(textLoop) == " ") {
+                    let splitStr = inputString.substr(startOfNewWord, (textLoop - (startOfNewWord - 1)))
+                    wordArray[numberOfWords] = splitStr
+                    wordLengthArray[numberOfWords] = splitStr.length
+                    numberOfWords += 1
+                    startOfNewWord = textLoop + 1
+                }
+                else if (textLoop == inputString.length) {
+                    let splitStr = inputString.substr(startOfNewWord, (textLoop - (startOfNewWord - 1)))
+                    wordArray[numberOfWords] = splitStr + " "
+                    wordLengthArray[numberOfWords] = splitStr.length + 1
+                    numberOfWords += 1
+                }
             }
-            else if (textLoop == inputString.length) {
-                let splitStr = inputString.substr(startOfNewWord, (textLoop - (startOfNewWord - 1)))
-                wordArray[numberOfWords] = splitStr + " "
-                wordLengthArray[numberOfWords] = splitStr.length + 1
-                numberOfWords += 1
+            textLoop = 0
+            let screenLine = 0
+
+            //check the length of words added to string fits on the single line of LCD, if it doesnt start a new line
+            for (textLoop = 0; textLoop <= numberOfWords; textLoop++) {
+
+                if (textLoop == numberOfWords) {
+                    stringArray[numberOfStrings] = createString
+                    numberOfStrings += 1
+                }
+                else if ((screenLine + wordLengthArray[textLoop]) <= NUMBER_OF_CHAR_PER_LINE) {  //check the current string length plus the next word legnth will fit on the LCD line
+                    createString = createString + wordArray[textLoop]               //if it does, add it to the string
+                    screenLine = createString.length                                //increase the displayed string length to check ready for next word
+                }
+                else {
+                    stringArray[numberOfStrings] = createString //save the strings to be displayed on the LCD
+                    numberOfStrings += 1                        //add the total number of lines to be displayed created
+                    createString = wordArray[textLoop]          //start with next word
+                    screenLine = wordLengthArray[textLoop]      //start with the next word length             
+                }
             }
         }
-        textLoop = 0
-        let screenLine = 0
-
-        //check the length of words added to string fits on a single line of the display, if it doesn't, start a new line
-        for (textLoop = 0; textLoop <= numberOfWords; textLoop++) {
-
-            if (textLoop == numberOfWords) {
-                stringArray[numberOfStrings] = createString
-                numberOfStrings += 1
-            }
-            else if ((screenLine + wordLengthArray[textLoop]) <= NUMBER_OF_CHAR_PER_LINE) {  //check the current string length plus the next word length will fit on the display line
-                createString = createString + wordArray[textLoop]               //if it does, add it to the string
-                screenLine = createString.length                                //increase the displayed string length to check ready for next word
-            }
-            else {
-                stringArray[numberOfStrings] = createString //save the strings to be displayed on the display
-                numberOfStrings += 1                        //add the total number of lines to be displayed created
-                createString = wordArray[textLoop]          //start with next word
-                screenLine = wordLengthArray[textLoop]      //start with the next word length             
-            }
+        else{
+            stringArray[0] = inputString
+            numberOfStrings = 1
         }
 
         let col = 0
@@ -436,7 +442,7 @@ namespace kitronik_VIEW128x64 {
             
             if (inputString.length < NUMBER_OF_CHAR_PER_LINE)
             {
-                while(inputString.length < NUMBER_OF_CHAR_PER_LINE){    //Loop will add white spaces on side of string depending on which alignment
+                while(inputString.length < (NUMBER_OF_CHAR_PER_LINE-1)){    //Loop will add white spaces on side of string depending on which alignment
                     if (displayShowAlign == ShowAlign.Left){
                         inputString = inputString + " "
                     }
@@ -452,12 +458,13 @@ namespace kitronik_VIEW128x64 {
                         inputString = " " + inputString
                     }
                 }
-                
             }
-
+            else if (inputString.length >= NUMBER_OF_CHAR_PER_LINE){
+                inputString = inputString.substr(0, NUMBER_OF_CHAR_PER_LINE)
+            }
             for (let charOfString = 0; charOfString < inputString.length; charOfString++) {
                 charDisplayBytes = font[inputString.charCodeAt(charOfString)]
-                for (let i = 0; i < 5; i++) {  //for loop will take byte font array and load it into the correct register, then shift to the next byte to load into the next location
+                for (let i = 0; i < 5; i++) {  //for loop will take byte font array and load it into the correct register, the shift to the next byte to load into the next location
                     col = 0
                     for (let j = 0; j < 5; j++) {
                         if (charDisplayBytes & (1 << (5 * i + j)))
@@ -468,29 +475,178 @@ namespace kitronik_VIEW128x64 {
                     screenBuf[ind] = col
                 }
             }
-            
+
             set_pos(x * 5, y)                               //set the start position to write to
             let ind0 = x * 5 + y * 128
+            //let ind0 = 0
             //basic.showNumber(0)
-            //basic.showNumber(ind0)
-            //basic.showNumber(ind)
-            let buf = screenBuf.slice(ind0, ind)
+            let buf = screenBuf.slice(0, 1025)
             //basic.showNumber(1)
-            if (y < 7) {
+            if (y <= 6){
                 //basic.showNumber(2)
-                buf = screenBuf.slice(ind0, ind + 1)
-                y += 1  
+                //ind0 = x * 5 + y * 128
+                buf = screenBuf.slice(ind0, 1025)
             }
+            else{
+                //basic.showNumber(3)
+                //ind0 = x * 5 + y * 127
+                buf = screenBuf.slice(ind0, 1025)
+            }
+            //basic.showNumber(4)
             buf[0] = 0x40
             pins.i2cWriteBuffer(displayAddress, buf)        //send data to the screen
-            //basic.showNumber(3)
-            //if (y == 7) {
-            //    break
-            //}
+            if (y < 7){
+                y += 1
+            } 
+        }
+    }   
+/////////////////////////////////////////////////////////////////////////
+
+/**
+     * 'show' allows any number, string or variable to be displayed on the screen.
+     * The block is expandable to set the line and alignment.
+     * @param displayShowAlign is the alignment of the text, this can be left, centre or right
+     * @param line is line the text to be started on, eg: 1
+     * @param inputData is the text will be show
+     * @param screen is screen selection when using multiple screens
+     */
+    //% blockId="VIEW128x64_show_better" block="hows %s|| on line %line| with alignment: %displayShowAlign"
+    //% weight=80 blockGap=8
+    //% group="Show"
+    //% expandableArgumentMode="enable"
+    //% inlineInputMode=inline
+    //% line.min=1 line.max=8
+    export function showBetter(inputData: any,  line?: number, displayShowAlign?: ShowAlign, screen?: 1) {
+        let y = 0
+        let x = 0
+        let inputString = convertToText(inputData)
+        inputString = inputString + " "
+        displayAddress = setScreenAddr(screen)
+        if (initialised == 0){
+            initDisplay(1)
+        } 
+            
+        if (!displayShowAlign){//if variable y has not been used, default to y position of 0
+            displayShowAlign=ShowAlign.Left
         }
 
+        //if variable y has not been used, default to y position of 0
+        if (!line){
+            y=0
+        }
+        else{
+            y = (line-1)
+        }
+
+        //sort text into lines
+        //let lengthOfText = inputString.length
+        //let textLoop = 0
+        //let wordArray: string[] = []
+        //let wordLengthArray: number[] = []
+        let stringArray: string[] = []
+        let numberOfStrings = 0
+        let startOfNewString = 0
+        //let charLength = 0
+        //let word = 0
+        //let createString = ""
+
+        let previousSpacePoint = 0
+        let spacePoint = 0
+        let startOfString = 0
+        let saveString = ""
+        if (inputString.length > NUMBER_OF_CHAR_PER_LINE){
+            for (let spaceFinder = 0; spaceFinder <= inputString.length; spaceFinder++ )
+            {
+                if (inputString.charAt(spaceFinder) == " "){                            //check the charector is a space, if so...
+                    spacePoint = spaceFinder                                            //remember the location of the new space found
+                    if ((spacePoint - startOfString) < NUMBER_OF_CHAR_PER_LINE){        //check if the current location minus start of string is less than number of char on a screen
+                        previousSpacePoint = spacePoint                                //remember that point for later
+                        if (spaceFinder == inputString.length){
+                            saveString = inputString.substr(startOfNewString, spacePoint)//cut the string from start of word to the last space and store it
+                            stringArray[numberOfStrings] = saveString
+                            numberOfStrings += 1
+                            basic.showString("A")
+                            basic.showNumber(numberOfStrings)
+                        }
+                    }
+                    else if ((spacePoint - startOfString) > NUMBER_OF_CHAR_PER_LINE){   //check if the current location minus start of string is greater than number of char on a screen
+                        saveString = inputString.substr(startOfNewString, previousSpacePoint)//cut the string from start of word to the last space and store it
+                        stringArray[numberOfStrings] = saveString
+                        startOfNewString = previousSpacePoint + 1                       //set start of new word from last space plus one position
+                        numberOfStrings += 1                                            //increase the number of strings variable
+                        basic.showString("B")
+                        basic.showNumber(numberOfStrings)
+                    }
+                    else if ((spacePoint - startOfString) == NUMBER_OF_CHAR_PER_LINE){  //check if the current location minus start of string is equals than number of char on a screen
+                        saveString = inputString.substr(startOfNewString, spacePoint)
+                        stringArray[numberOfStrings] = saveString
+                        startOfNewString = spacePoint + 1
+                        previousSpacePoint = spacePoint
+                        numberOfStrings += 1
+                        basic.showString("C")
+                        basic.showNumber(numberOfStrings)
+                    }
+                }
+            }
+        }
+        else{
+            stringArray[numberOfStrings] = inputString
+            numberOfStrings += 1
+        }
+
+        basic.showNumber(numberOfStrings)
+        let col = 0
+        let charDisplayBytes = 0
+        let ind = 0
+        
+        //add for loop for lines
+        for (let textLine = 0; textLine <= (numberOfStrings-1); textLine++)
+        {
+            inputString = stringArray[textLine]
+            
+            if (inputString.length < NUMBER_OF_CHAR_PER_LINE)
+            {
+                while(inputString.length < (NUMBER_OF_CHAR_PER_LINE-1)){    //Loop will add white spaces on side of string depending on which alignment
+                    if (displayShowAlign == ShowAlign.Left){
+                        inputString = inputString + " "
+                    }
+                    else if (displayShowAlign == ShowAlign.Centre){
+                        if (inputString.length % 2 == 0){
+                            inputString = " " + inputString + " "
+                        }
+                        else {
+                            inputString = inputString + " "
+                        }
+                    } 
+                    else if (displayShowAlign == ShowAlign.Right){
+                        inputString = " " + inputString
+                    }
+                }
+            }
+
+            for (let charOfString = 0; charOfString < inputString.length; charOfString++) {
+                charDisplayBytes = font[inputString.charCodeAt(charOfString)]
+                for (let i = 0; i < 5; i++) {  //for loop will take byte font array and load it into the correct register, the shift to the next byte to load into the next location
+                    col = 0
+                    for (let j = 0; j < 5; j++) {
+                        if (charDisplayBytes & (1 << (5 * i + j)))
+                            col |= (1 << (j + 1))
+                    }
+
+                    ind = (x + charOfString) * 5 + y * 128 + i + 1
+                    screenBuf[ind] = col
+                }
+            }
+            set_pos(x * 5, y)                               //set the start position to write to
+            let ind0 = x * 5 + y * 128
+            let buf = screenBuf.slice(ind0, ind + 1)
+            buf[0] = 0x40
+            pins.i2cWriteBuffer(displayAddress, buf)        //send data to the screen
+            y += 1 
+        }
     }
- 
+
+///////////////////////////////////////////////////////////////
     /**
      * Draw a line using the x and y co-rdinates as a starting point to a given length
      * @param lineDirection is the selection of either horizontal line or vertical line
