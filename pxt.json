@@ -9,7 +9,6 @@
     },
     "files": [
         "README.md",
-        "main.blocks",
         "main.ts",
         "Tutorial_A_Setup_and_basic_function.md",
         "Tutorial_B_Plot_Graph.md"
