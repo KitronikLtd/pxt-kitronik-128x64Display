@@ -1,139 +1,140 @@
 /**
  * Kitronik VIEW 128x64 Display blocks
- * LCD chip SSD1603
+ * OLED chip SSD1603
  **/
 //% weight=100 color=#00A654 icon="\uf26c" block="128x64 Display"
 //% groups='["Control", "Show", "Draw", "Delete"]'
 namespace kitronik_VIEW128x64 {
+    // ASCII Code to OLED 5x8 pixel character for display conversion
     let font: number[] = [];
-    font[0] = 0x0022d422;
-    font[1] = 0x0022d422;
-    font[2] = 0x0022d422;
-    font[3] = 0x0022d422;
-    font[4] = 0x0022d422;
-    font[5] = 0x0022d422;
-    font[6] = 0x0022d422;
-    font[7] = 0x0022d422;
-    font[8] = 0x0022d422;
-    font[9] = 0x0022d422;
-    font[10] = 0x0022d422;
-    font[11] = 0x0022d422;
-    font[12] = 0x0022d422;
-    font[13] = 0x0022d422;
-    font[14] = 0x0022d422;
-    font[15] = 0x0022d422;
-    font[16] = 0x0022d422;
-    font[17] = 0x0022d422;
-    font[18] = 0x0022d422;
-    font[19] = 0x0022d422;
-    font[20] = 0x0022d422;
-    font[21] = 0x0022d422;
-    font[22] = 0x0022d422;
-    font[23] = 0x0022d422;
-    font[24] = 0x0022d422;
-    font[25] = 0x0022d422;
-    font[26] = 0x0022d422;
-    font[27] = 0x0022d422;
-    font[28] = 0x0022d422;
-    font[29] = 0x0022d422;
-    font[30] = 0x0022d422;
-    font[31] = 0x0022d422;
-    font[32] = 0x00000000;
-    font[33] = 0x000002e0;
-    font[34] = 0x00018060;
-    font[35] = 0x00afabea;
-    font[36] = 0x00aed6ea;
-    font[37] = 0x01991133;
-    font[38] = 0x010556aa;
-    font[39] = 0x00000060;
-    font[40] = 0x000045c0;
-    font[41] = 0x00003a20;
-    font[42] = 0x00051140;
-    font[43] = 0x00023880;
-    font[44] = 0x00002200;
-    font[45] = 0x00021080;
-    font[46] = 0x00000100;
-    font[47] = 0x00111110;
-    font[48] = 0x0007462e;
-    font[49] = 0x00087e40;
-    font[50] = 0x000956b9;
-    font[51] = 0x0005d629;
-    font[52] = 0x008fa54c;
-    font[53] = 0x009ad6b7;
-    font[54] = 0x008ada88;
-    font[55] = 0x00119531;
-    font[56] = 0x00aad6aa;
-    font[57] = 0x0022b6a2;
-    font[58] = 0x00000140;
-    font[59] = 0x00002a00;
-    font[60] = 0x0008a880;
-    font[61] = 0x00052940;
-    font[62] = 0x00022a20;
-    font[63] = 0x0022d422;
-    font[64] = 0x00e4d62e;
-    font[65] = 0x000f14be;
-    font[66] = 0x000556bf;
-    font[67] = 0x0008c62e;
-    font[68] = 0x0007463f;
-    font[69] = 0x0008d6bf;
-    font[70] = 0x000094bf;
-    font[71] = 0x00cac62e;
-    font[72] = 0x000f909f;
-    font[73] = 0x000047f1;
-    font[74] = 0x0017c629;
-    font[75] = 0x0008a89f;
-    font[76] = 0x0008421f;
-    font[77] = 0x01f1105f;
-    font[78] = 0x01f4105f;
-    font[79] = 0x0007462e;
-    font[80] = 0x000114bf;
-    font[81] = 0x000b6526;
-    font[82] = 0x010514bf;
-    font[83] = 0x0004d6b2;
-    font[84] = 0x0010fc21;
-    font[85] = 0x0007c20f;
-    font[86] = 0x00744107;
-    font[87] = 0x01f4111f;
-    font[88] = 0x000d909b;
-    font[89] = 0x00117041;
-    font[90] = 0x0008ceb9;
-    font[91] = 0x0008c7e0;
-    font[92] = 0x01041041;
-    font[93] = 0x000fc620;
-    font[94] = 0x00010440;
-    font[95] = 0x01084210;
-    font[96] = 0x00000820;
-    font[97] = 0x010f4a4c;
-    font[98] = 0x0004529f;
-    font[99] = 0x00094a4c;
-    font[100] = 0x000fd288;
-    font[101] = 0x000956ae;
-    font[102] = 0x000097c4;
-    font[103] = 0x0007d6a2;
-    font[104] = 0x000c109f;
-    font[105] = 0x000003a0;
-    font[106] = 0x0006c200;
-    font[107] = 0x0008289f;
-    font[108] = 0x000841e0;
-    font[109] = 0x01e1105e;
-    font[110] = 0x000e085e;
-    font[111] = 0x00064a4c;
-    font[112] = 0x0002295e;
-    font[113] = 0x000f2944;
-    font[114] = 0x0001085c;
-    font[115] = 0x00012a90;
-    font[116] = 0x010a51e0;
-    font[117] = 0x010f420e;
-    font[118] = 0x00644106;
-    font[119] = 0x01e8221e;
-    font[120] = 0x00093192;
-    font[121] = 0x00222292;
-    font[122] = 0x00095b52;
-    font[123] = 0x0008fc80;
-    font[124] = 0x000003e0;
-    font[125] = 0x000013f1;
-    font[126] = 0x00841080;
-    font[127] = 0x0022d422;
+    font[0] = 0x0022d422;   // NUL (null) [non-printable]
+    font[1] = 0x0022d422;   // SOH (start of heading) [non-printable]
+    font[2] = 0x0022d422;   // STX (start of text) [non-printable]
+    font[3] = 0x0022d422;   // ETX (end of text) [non-printable]
+    font[4] = 0x0022d422;   // EOT (end of transmission) [non-printable]
+    font[5] = 0x0022d422;   // ENQ (enquiry) [non-printable]
+    font[6] = 0x0022d422;   // ACK (acknowledge) [non-printable]
+    font[7] = 0x0022d422;   // BEL (bell) [non-printable]
+    font[8] = 0x0022d422;   // BS (backspace) [non-printable]
+    font[9] = 0x0022d422;   // TAB (horizontal tab) [non-printable]
+    font[10] = 0x0022d422;  // LF (NL line feed, new line) [non-printable]
+    font[11] = 0x0022d422;  // VT (vertical tab) [non-printable]
+    font[12] = 0x0022d422;  // FF (NP form feed, new page) [non-printable]
+    font[13] = 0x0022d422;  // CR (carraige return) [non-printable]
+    font[14] = 0x0022d422;  // SO (shift out) [non-printable]
+    font[15] = 0x0022d422;  // SI (shift in) [non-printable]
+    font[16] = 0x0022d422;  // DLE (data link escape) [non-printable]
+    font[17] = 0x0022d422;  // DC1 (device control 1) [non-printable]
+    font[18] = 0x0022d422;  // DC2 (device control 2) [non-printable]
+    font[19] = 0x0022d422;  // DC2 (device control 3) [non-printable]
+    font[20] = 0x0022d422;  // DC4 (device control 4) [non-printable]
+    font[21] = 0x0022d422;  // NAK (negative acknowledge) [non-printable]
+    font[22] = 0x0022d422;  // SYN (synchronous idle) [non-printable]
+    font[23] = 0x0022d422;  // ETB (end of transmission block) [non-printable]
+    font[24] = 0x0022d422;  // CAN (cancel) [non-printable]
+    font[25] = 0x0022d422;  // EM (end of medium) [non-printable]
+    font[26] = 0x0022d422;  // SUB (substitute) [non-printable]
+    font[27] = 0x0022d422;  // ESC (escape) [non-printable]
+    font[28] = 0x0022d422;  // FS (file separator) [non-printable]
+    font[29] = 0x0022d422;  // GS (group separator) [non-printable]
+    font[30] = 0x0022d422;  // RS (record separator) [non-printable]
+    font[31] = 0x0022d422;  // US (unit separator) [non-printable]
+    font[32] = 0x00000000;  // Space
+    font[33] = 0x000002e0;  // !
+    font[34] = 0x00018060;  // "
+    font[35] = 0x00afabea;  // #
+    font[36] = 0x00aed6ea;  // $
+    font[37] = 0x01991133;  // %
+    font[38] = 0x010556aa;  // &
+    font[39] = 0x00000060;  // '
+    font[40] = 0x000045c0;  // (
+    font[41] = 0x00003a20;  // )
+    font[42] = 0x00051140;  // *
+    font[43] = 0x00023880;  // +
+    font[44] = 0x00002200;  // ,
+    font[45] = 0x00021080;  // -
+    font[46] = 0x00000100;  // .
+    font[47] = 0x00111110;  // /
+    font[48] = 0x0007462e;  // 0
+    font[49] = 0x00087e40;  // 1
+    font[50] = 0x000956b9;  // 2
+    font[51] = 0x0005d629;  // 3
+    font[52] = 0x008fa54c;  // 4
+    font[53] = 0x009ad6b7;  // 5
+    font[54] = 0x008ada88;  // 6
+    font[55] = 0x00119531;  // 7
+    font[56] = 0x00aad6aa;  // 8
+    font[57] = 0x0022b6a2;  // 9
+    font[58] = 0x00000140;  // :
+    font[59] = 0x00002a00;  // ;
+    font[60] = 0x0008a880;  // <
+    font[61] = 0x00052940;  // =
+    font[62] = 0x00022a20;  // >
+    font[63] = 0x0022d422;  // ?
+    font[64] = 0x00e4d62e;  // @
+    font[65] = 0x000f14be;  // A
+    font[66] = 0x000556bf;  // B
+    font[67] = 0x0008c62e;  // C 
+    font[68] = 0x0007463f;  // D 
+    font[69] = 0x0008d6bf;  // E 
+    font[70] = 0x000094bf;  // F 
+    font[71] = 0x00cac62e;  // G 
+    font[72] = 0x000f909f;  // H 
+    font[73] = 0x000047f1;  // I 
+    font[74] = 0x0017c629;  // J 
+    font[75] = 0x0008a89f;  // K 
+    font[76] = 0x0008421f;  // L
+    font[77] = 0x01f1105f;  // M 
+    font[78] = 0x01f4105f;  // N 
+    font[79] = 0x0007462e;  // O 
+    font[80] = 0x000114bf;  // P 
+    font[81] = 0x000b6526;  // Q 
+    font[82] = 0x010514bf;  // R 
+    font[83] = 0x0004d6b2;  // S 
+    font[84] = 0x0010fc21;  // T 
+    font[85] = 0x0007c20f;  // U 
+    font[86] = 0x00744107;  // V
+    font[87] = 0x01f4111f;  // W 
+    font[88] = 0x000d909b;  // X 
+    font[89] = 0x00117041;  // Y 
+    font[90] = 0x0008ceb9;  // Z
+    font[91] = 0x0008c7e0;  // [
+    font[92] = 0x01041041;  // \
+    font[93] = 0x000fc620;  // ]
+    font[94] = 0x00010440;  // ^
+    font[95] = 0x01084210;  // _ 
+    font[96] = 0x00000820;  // `
+    font[97] = 0x010f4a4c;  // a 
+    font[98] = 0x0004529f;  // b 
+    font[99] = 0x00094a4c;  // c 
+    font[100] = 0x000fd288; // d 
+    font[101] = 0x000956ae; // e 
+    font[102] = 0x000097c4; // f 
+    font[103] = 0x0007d6a2; // g 
+    font[104] = 0x000c109f; // h 
+    font[105] = 0x000003a0; // i 
+    font[106] = 0x0006c200; // j 
+    font[107] = 0x0008289f; // k 
+    font[108] = 0x000841e0; // l 
+    font[109] = 0x01e1105e; // m 
+    font[110] = 0x000e085e; // n 
+    font[111] = 0x00064a4c; // o 
+    font[112] = 0x0002295e; // p 
+    font[113] = 0x000f2944; // q 
+    font[114] = 0x0001085c; // r 
+    font[115] = 0x00012a90; // s 
+    font[116] = 0x010a51e0; // t 
+    font[117] = 0x010f420e; // u 
+    font[118] = 0x00644106; // v 
+    font[119] = 0x01e8221e; // w 
+    font[120] = 0x00093192; // x 
+    font[121] = 0x00222292; // y 
+    font[122] = 0x00095b52; // z
+    font[123] = 0x0008fc80; // {
+    font[124] = 0x000003e0; // |
+    font[125] = 0x000013f1; // }
+    font[126] = 0x00841080; // ~
+    font[127] = 0x0022d422; // DEL
 
 
     /**
@@ -149,7 +150,7 @@ namespace kitronik_VIEW128x64 {
     }
 
     /**
-     * Selecting direction of drawing line
+     * Select direction for drawing lines
      */
     export enum LineDirectionSelection {
         //% block="horizontal"
@@ -158,27 +159,18 @@ namespace kitronik_VIEW128x64 {
         vertical
     }
 
-    //Screen buffers for sending data to the display
-    let screenBuf = pins.createBuffer(1025); // Changed to 1026 for testing, should be 1025
-    let ackBuf = pins.createBuffer(2);
-    let writeOneByteBuf = pins.createBuffer(2);
-    let writeTwoByteBuf = pins.createBuffer(3);
-    let writeThreeByteBuf = pins.createBuffer(4);
-
-    let initialised = 0    		//a flag to indicate automatic initalising the display
-
-    //Constants for Display
+    // Constants for Display
     let NUMBER_OF_CHAR_PER_LINE = 26
 
-    //default address forthe display
+    // Default address for the display
     let DISPLAY_ADDR_1 = 60
     let DISPLAY_ADDR_2 = 10
     let displayAddress = DISPLAY_ADDR_1;
 
-    //text alignment
+    // Text alignment, defaulted to "Left"
     let displayShowAlign = ShowAlign.Left
     
-    //plot variables
+    // Plot variables
     let plotArray: number[] = []
     let plottingEnable = 0
     let plotData = 0;
@@ -189,14 +181,23 @@ namespace kitronik_VIEW128x64 {
     let GRAPH_Y_MAX_LOCATION = 20
     let previousYPlot = 0
 
-    //function write one byte of data to the display
+    // Screen buffers for sending data to the display
+    let screenBuf = pins.createBuffer(1025); 
+    let ackBuf = pins.createBuffer(2);
+    let writeOneByteBuf = pins.createBuffer(2);
+    let writeTwoByteBuf = pins.createBuffer(3);
+    let writeThreeByteBuf = pins.createBuffer(4);
+
+    let initialised = 0    		// Flag to indicate automatic initalisation of the display
+
+    // Function to write one byte of data to the display
     function writeOneByte(regValue: number) {
         writeOneByteBuf[0] = 0;
         writeOneByteBuf[1] = regValue;
         pins.i2cWriteBuffer(displayAddress, writeOneByteBuf);
     }
 
-    //function write two byte of data to the display
+    // Function to write two bytes of data to the display
     function writeTwoByte(regValue1: number, regValue2: number) {
         writeTwoByteBuf[0] = 0;
         writeTwoByteBuf[1] = regValue1;
@@ -204,7 +205,7 @@ namespace kitronik_VIEW128x64 {
         pins.i2cWriteBuffer(displayAddress, writeTwoByteBuf);
     }
 
-    //function write three byte of data to the display
+    // Function to write three bytes of data to the display
     function writeThreeByte(regValue1: number, regValue2: number, regValue3: number) {
         writeThreeByteBuf[0] = 0;
         writeThreeByteBuf[1] = regValue1;
@@ -213,20 +214,21 @@ namespace kitronik_VIEW128x64 {
         pins.i2cWriteBuffer(displayAddress, writeThreeByteBuf);
     }
 
+    // Set the starting on the display for writing text
     function set_pos(col: number = 0, page: number = 0) {
         writeOneByte(0xb0 | page) // page number
         writeOneByte(0x00 | (col % 16)) // lower start column address
         writeOneByte(0x10 | (col >> 4)) // upper start column address    
     }
 
-    // clear bit
+    // 
     function clearBit(d: number, b: number): number {
         if (d & (1 << b))
             d -= (1 << b)
         return d
     }
 
-    // sorts the value and return the correct address
+    // Return the correct display I2C address based on selection
     function setScreenAddr(selection: number): number {
         let addr = 0
         if (selection == 1){
@@ -242,48 +244,48 @@ namespace kitronik_VIEW128x64 {
     }
 
     /**
-     * Setup of display ready for using
+     * Setup the display ready for use (function on available in text languages, not blocks)
      * @param screen is the selection of which screen to initialise
      */
     export function initDisplay(screen?: number): void {
         
         displayAddress = setScreenAddr(screen)
-        //load the ackBuffer to check is there is a display there before starting initalising of ths display
+        // Load the ackBuffer to check if there is a display there before starting initalisation
         ackBuf[0] = 0
         ackBuf[1] = 0xAF
         let ack = pins.i2cWriteBuffer(displayAddress, ackBuf)
-        if (ack == -1010){ //ifvalue return back is -1010, there is no display and show error message
+        if (ack == -1010){      // If returned value back is -1010, there is no display so show error message
             basic.showString("ERROR - no display")
         }
-        else{   //start initalising of the display
-            writeOneByte(0xAE)       // SSD1306_DISPLAYOFF
-            writeOneByte(0xA4)       // SSD1306_DISPLAYALLON_RESUME
-            writeTwoByte(0xD5, 0xF0) // SSD1306_SETDISPLAYCLOCKDIV
-            writeTwoByte(0xA8, 0x3F) // SSD1306_SETMULTIPLEX
-            writeTwoByte(0xD3, 0x00) // SSD1306_SETDISPLAYOFFSET
-            writeOneByte(0 | 0x0)    // line #SSD1306_SETSTARTLINE
-            writeTwoByte(0x8D, 0x14) // SSD1306_CHARGEPUMP
-            writeTwoByte(0x20, 0x00) // SSD1306_MEMORYMODE
-            writeThreeByte(0x21, 0, 127) // SSD1306_COLUMNADDR
-            writeThreeByte(0x22, 0, 63)  // SSD1306_PAGEADDR
-            writeOneByte(0xa0 | 0x1) // SSD1306_SEGREMAP
-            writeOneByte(0xc8)       // SSD1306_COMSCANDEC
-            writeTwoByte(0xDA, 0x12) // SSD1306_SETCOMPINS
-            writeTwoByte(0x81, 0xCF) // SSD1306_SETCONTRAST
-            writeTwoByte(0xd9, 0xF1) // SSD1306_SETPRECHARGE
-            writeTwoByte(0xDB, 0x40) // SSD1306_SETVCOMDETECT
-            writeOneByte(0xA6)       // SSD1306_NORMALDISPLAY
-            writeTwoByte(0xD6, 0)    // zoom is set to off
-            writeOneByte(0xAF)       // SSD1306_DISPLAYON
+        else{   // Start initalising the display
+            writeOneByte(0xAE)              // SSD1306_DISPLAYOFF
+            writeOneByte(0xA4)              // SSD1306_DISPLAYALLON_RESUME
+            writeTwoByte(0xD5, 0xF0)        // SSD1306_SETDISPLAYCLOCKDIV
+            writeTwoByte(0xA8, 0x3F)        // SSD1306_SETMULTIPLEX
+            writeTwoByte(0xD3, 0x00)        // SSD1306_SETDISPLAYOFFSET
+            writeOneByte(0 | 0x0)           // line #SSD1306_SETSTARTLINE
+            writeTwoByte(0x8D, 0x14)        // SSD1306_CHARGEPUMP
+            writeTwoByte(0x20, 0x00)        // SSD1306_MEMORYMODE
+            writeThreeByte(0x21, 0, 127)    // SSD1306_COLUMNADDR
+            writeThreeByte(0x22, 0, 63)     // SSD1306_PAGEADDR
+            writeOneByte(0xa0 | 0x1)        // SSD1306_SEGREMAP
+            writeOneByte(0xc8)              // SSD1306_COMSCANDEC
+            writeTwoByte(0xDA, 0x12)        // SSD1306_SETCOMPINS
+            writeTwoByte(0x81, 0xCF)        // SSD1306_SETCONTRAST
+            writeTwoByte(0xd9, 0xF1)        // SSD1306_SETPRECHARGE
+            writeTwoByte(0xDB, 0x40)        // SSD1306_SETVCOMDETECT
+            writeOneByte(0xA6)              // SSD1306_NORMALDISPLAY
+            writeTwoByte(0xD6, 0)           // Zoom is set to off
+            writeOneByte(0xAF)              // SSD1306_DISPLAYON
             initialised = 1
             clear()
         }
     }
 
     /**
-     * Using the X Y co-ordinates, it is possible to turn on a selected pixel on the display
-     * @param x is X alis, eg: 0
-     * @param y is Y alis, eg: 0
+     * Using (x, y) coordinates, turn on a selected pixel on the display
+     * @param x is the X axis value, eg: 0
+     * @param y is the Y axis value, eg: 0
      * @param screen is screen selection when using multiple screens
      */
     //% blockId="VIEW128x64_set_pixel" block="show pixel at x %x|y %y"
@@ -299,20 +301,20 @@ namespace kitronik_VIEW128x64 {
         }
 
         let page = y >> 3                                       
-        let shift_page = y % 8                                  //calculate the page to write to
-        let ind = x + page * 128 + 1                            //calculate which register in the page to write to.
-        let screenPixel = (screenBuf[ind] | (1 << shift_page))  //set the screen data byte
-        screenBuf[ind] = screenPixel                            //store data in screen buffer
-        set_pos(x, page)                                        //set the position on the screen to write at 
-        writeOneByteBuf[0] = 0x40                               //load buffer with command
-        writeOneByteBuf[1] = screenPixel                        //load buffer with byte
-        pins.i2cWriteBuffer(displayAddress, writeOneByteBuf)    //send data to screen
+        let shift_page = y % 8                                  // Calculate the page to write to
+        let ind = x + page * 128 + 1                            // Calculate which register in the page to write to
+        let screenPixel = (screenBuf[ind] | (1 << shift_page))  // Set the screen data byte
+        screenBuf[ind] = screenPixel                            // Store data in screen buffer
+        set_pos(x, page)                                        // Set the position on the screen to write at 
+        writeOneByteBuf[0] = 0x40                               // Load buffer with command
+        writeOneByteBuf[1] = screenPixel                        // Load buffer with byte
+        pins.i2cWriteBuffer(displayAddress, writeOneByteBuf)    // Send data to screen
     }
 
     /**
-     * Using the X Y co-ordinates, it is possible to turn on a selected pixel on the display
-     * @param x is X alis, eg: 0
-     * @param y is Y alis, eg: 0
+     * Using the (x, y) coordinates, clear a selected pixel on the display
+     * @param x is the X axis value, eg: 0
+     * @param y is the Y axis value, eg: 0
      * @param screen is screen selection when using multiple screens
      */
     //% blockId="VIEW128x64_clear_pixel" block="clear pixel at x %x|y %y"
@@ -328,17 +330,17 @@ namespace kitronik_VIEW128x64 {
         }   
 
         let page2 = y >> 3
-        let shift_page2 = y % 8                                  //calculate the page to write to
-        let ind2 = x + page2 * 128 + 1                            //calculate which register in the page to write to.
-        let screenPixel2 = clearBit(screenBuf[ind2], shift_page2)  //clear the screen data byte
-        screenBuf[ind2] = screenPixel2                            //store data in screen buffer
-        set_pos(x, page2)                                        //set the position on the screen to write at 
-        writeOneByteBuf[0] = 0x40                               //load buffer with command
-        writeOneByteBuf[1] = screenPixel2                        //load buffer with byte
-        pins.i2cWriteBuffer(displayAddress, writeOneByteBuf)    //send data to screen
+        let shift_page2 = y % 8                                     // Calculate the page to write to
+        let ind2 = x + page2 * 128 + 1                              // Calculate which register in the page to write to
+        let screenPixel2 = clearBit(screenBuf[ind2], shift_page2)   // Clear the screen data byte
+        screenBuf[ind2] = screenPixel2                              // Store data in screen buffer
+        set_pos(x, page2)                                           // Set the position on the screen to write at 
+        writeOneByteBuf[0] = 0x40                                   // Load buffer with command
+        writeOneByteBuf[1] = screenPixel2                           // Load buffer with byte
+        pins.i2cWriteBuffer(displayAddress, writeOneByteBuf)        // Send data to screen
     }
 
-/**
+    /**
      * 'show' allows any number, string or variable to be displayed on the screen.
      * The block is expandable to set the line and alignment.
      * @param displayShowAlign is the alignment of the text, this can be left, centre or right
@@ -361,12 +363,14 @@ namespace kitronik_VIEW128x64 {
         if (initialised == 0){
             initDisplay(1)
         } 
-            
-        if (!displayShowAlign){//if variable y has not been used, default to y position of 0
+        
+        // If text alignment has not been specified, default to "Left"
+        if (!displayShowAlign){     
             displayShowAlign=ShowAlign.Left
         }
 
-        //if variable y has not been used, default to y position of 0
+        // If the screen line has not bee specified, default to top line (i.e. y = 0)
+        // Otherwise, subtract '1' from the line number to return correct y value
         if (!line){
             y=0
         }
@@ -374,7 +378,7 @@ namespace kitronik_VIEW128x64 {
             y = (line-1)
         }
 
-        //sort text into lines
+        // Sort text into lines
         let stringArray: string[] = []
         let numberOfStrings = 0
 
@@ -390,23 +394,23 @@ namespace kitronik_VIEW128x64 {
             else{
                 for (let spaceFinder = 0; spaceFinder <= inputString.length; spaceFinder++ )
                 {
-                    if (inputString.charAt(spaceFinder) == " "){                            //check the charector is a space, if so...
-                        spacePoint = spaceFinder                                            //remember the location of the new space found
-                        if ((spacePoint - startOfString) < NUMBER_OF_CHAR_PER_LINE){        //check if the current location minus start of string is less than number of char on a screen
-                            previousSpacePoint = spacePoint                                //remember that point for later
+                    if (inputString.charAt(spaceFinder) == " "){                                // Check whether the charector is a space, if so...
+                        spacePoint = spaceFinder                                                // Remember the location of the new space found
+                        if ((spacePoint - startOfString) < NUMBER_OF_CHAR_PER_LINE){            // Check if the current location minus start of string is less than number of char on a screen
+                            previousSpacePoint = spacePoint                                     // Remember that point for later
                             if (spaceFinder == (inputString.length-1)){
-                                saveString = inputString.substr(startOfString, spacePoint)//cut the string from start of word to the last space and store it
+                                saveString = inputString.substr(startOfString, spacePoint)      // Cut the string from start of word to the last space and store it
                                 stringArray[numberOfStrings] = saveString
                                 numberOfStrings += 1
                             }
                         }
-                        else if ((spacePoint - startOfString) > NUMBER_OF_CHAR_PER_LINE){   //check if the current location minus start of string is greater than number of char on a screen
-                            saveString = inputString.substr(startOfString, previousSpacePoint)//cut the string from start of word to the last space and store it
+                        else if ((spacePoint - startOfString) > NUMBER_OF_CHAR_PER_LINE){       // Check if the current location minus start of string is greater than number of char on a screen
+                            saveString = inputString.substr(startOfString, previousSpacePoint)  // Cut the string from start of word to the last space and store it
                             stringArray[numberOfStrings] = saveString
-                            startOfString = previousSpacePoint + 1                       //set start of new word from last space plus one position
-                            numberOfStrings += 1                                            //increase the number of strings variable
+                            startOfString = previousSpacePoint + 1                              // Set start of new word from last space plus one position
+                            numberOfStrings += 1                                                // Increase the number of strings variable
                         }
-                        else if ((spacePoint - startOfString) == NUMBER_OF_CHAR_PER_LINE){  //check if the current location minus start of string is equals than number of char on a screen
+                        else if ((spacePoint - startOfString) == NUMBER_OF_CHAR_PER_LINE){      // Check if the current location minus start of string equals than number of char on a screen
                             saveString = inputString.substr(startOfString, spacePoint)
                             stringArray[numberOfStrings] = saveString
                             startOfString = spacePoint + 1
@@ -426,7 +430,7 @@ namespace kitronik_VIEW128x64 {
         let charDisplayBytes = 0
         let ind = 0
 
-        //add for loop for lines
+        // Set text alignment, fill up the screenBuffer with data and send to the display
         for (let textLine = 0; textLine <= (numberOfStrings-1); textLine++)
         {
             let displayString = stringArray[textLine]
@@ -446,7 +450,7 @@ namespace kitronik_VIEW128x64 {
 
             for (let charOfString = 0; charOfString < displayString.length; charOfString++) {
                 charDisplayBytes = font[displayString.charCodeAt(charOfString)]
-                for (let k = 0; k < 5; k++) {  //for loop will take byte font array and load it into the correct register, the shift to the next byte to load into the next location
+                for (let k = 0; k < 5; k++) {  // 'for' loop will take byte font array and load it into the correct register, then shift to the next byte to load into the next location
                     col = 0
                     for (let l = 0; l < 5; l++) {
                         if (charDisplayBytes & (1 << (5 * k + l)))
@@ -457,21 +461,18 @@ namespace kitronik_VIEW128x64 {
                     screenBuf[ind] = col
                 }
             }
-            set_pos(x * 5, y)                               //set the start position to write to
+            set_pos(x * 5, y)                               // Set the start position to write to
             let ind02 = x * 5 + y * 128
             let buf2 = screenBuf.slice(ind02, ind + 1)
             buf2[0] = 0x40
-            pins.i2cWriteBuffer(displayAddress, buf2)        //send data to the screen
+            pins.i2cWriteBuffer(displayAddress, buf2)       // Send data to the screen
             y += 1 
         }
     }
 
-/**
-     * 'show' allows any number, string or variable to be displayed on the screen.
-     * The block is expandable to set the line and alignment.
-     * @param displayShowAlign is the alignment of the text, this can be left, centre or right
-     * @param line is line the text to be started on, eg: 1
-     * @param inputData is the text will be show
+    /**
+     * Clear a specific line on the screen (1 to 8)
+     * @param line is line to clear, eg: 1
      * @param screen is screen selection when using multiple screens
      */
     //% blockId="VIEW128x64_clear_line" block="clear line %line"
@@ -488,13 +489,8 @@ namespace kitronik_VIEW128x64 {
             initDisplay(1)
         } 
 
-        //if variable y has not been used, default to y position of 0
-        if (!line){
-            y=0
-        }
-        else{
-            y = (line-1)
-        }
+        // Subtract '1' from the line number to return correct y value
+        y = (line-1)
 
         let col = 0
         let charDisplayBytes = 0
@@ -502,7 +498,7 @@ namespace kitronik_VIEW128x64 {
 
         for (let charOfString = 0; charOfString < NUMBER_OF_CHAR_PER_LINE; charOfString++) {
             charDisplayBytes = font[32]
-            for (let k = 0; k < 5; k++) {  //for loop will take byte font array and load it into the correct register, the shift to the next byte to load into the next location
+            for (let k = 0; k < 5; k++) {       // 'for' loop will take byte font array and load it into the correct register, then shift to the next byte to load into the next location
                 col = 0
                 for (let l = 0; l < 5; l++) {
                     if (charDisplayBytes & (1 << (5 * k + l)))
