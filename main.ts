@@ -422,7 +422,6 @@ namespace kitronik_VIEW128x64 {
             numberOfStrings += 1
         }
 
-        //basic.showNumber(numberOfStrings)
         let col = 0
         let charDisplayBytes = 0
         let ind = 0
@@ -431,7 +430,7 @@ namespace kitronik_VIEW128x64 {
         for (let textLine = 0; textLine <= (numberOfStrings-1); textLine++)
         {
             let displayString = stringArray[textLine]
-            basic.showNumber(textLine)
+
             if (inputString.length < (NUMBER_OF_CHAR_PER_LINE-1))
             {
                 if (displayShowAlign == ShowAlign.Left){
@@ -497,7 +496,6 @@ namespace kitronik_VIEW128x64 {
             y = (line-1)
         }
 
-        //basic.showNumber(numberOfStrings)
         let col = 0
         let charDisplayBytes = 0
         let ind = 0
