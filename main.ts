@@ -496,25 +496,7 @@ namespace kitronik_VIEW128x64 {
         let charDisplayBytes = 0
         let ind = 0
 
-        for (let charOfString = 0; charOfString < NUMBER_OF_CHAR_PER_LINE; charOfString++) {
-            charDisplayBytes = font[32]         // SPACE
-            for (let k = 0; k < 5; k++) {       // 'for' loop will take byte font array and load it into the correct register, then shift to the next byte to load into the next location
-                col = 0
-                for (let l = 0; l < 5; l++) {
-                    if (charDisplayBytes & (1 << (5 * k + l)))
-                        col |= (1 << (l + 1))
-                }
-
-                ind = (x + charOfString) * 5 + y * 128 + k + 1
-                screenBuf[ind] = col
-            }
-        }
-        set_pos(x * 5, y)                               // Set the start position to write to
-        let ind02 = x * 5 + y * 128
-        let buf2 = screenBuf.slice(ind02, ind + 1)
-        buf2[0] = 0x40
-        pins.i2cWriteBuffer(displayAddress, buf2)        // Send data to the screen
-
+        show("                          ", line) // Write 26 spaces to the selected line to clear it
     }
 
     /**
