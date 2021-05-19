@@ -518,7 +518,7 @@ namespace kitronik_VIEW128x64 {
     }
 
     /**
-     * Draw a line using the x and y co-rdinates as a starting point to a given length
+     * Draw a line of a specific length in pixels, using the (x, y) coordinates as a starting point
      * @param lineDirection is the selection of either horizontal line or vertical line
      * @param x is start position on the X axis, eg: 0
      * @param y is start position on the Y axis, eg: 0
@@ -534,20 +534,20 @@ namespace kitronik_VIEW128x64 {
     //% inlineInputMode=inline
     export function drawLine(lineDirection: LineDirectionSelection, len: number, x: number, y: number, screen?: 1) {
         if (lineDirection == LineDirectionSelection.horizontal){
-            for (let m = x; m < (x + len); m++) //loop to set the pixel in the horizontal line
-                setPixel(m, y, screen)
+            for (let hPixel = x; hPixel < (x + len); hPixel++)      // Loop to set the pixels in the horizontal line
+                setPixel(hPixel, y, screen)
         }
         else if (lineDirection == LineDirectionSelection.vertical){
-            if (len >= 64){          //as length could be max on the x axis, this checks if a vertical lines is draw, max the value to the max of the y axis
+            if (len >= 64){          // For horizontal, 'len' can be max of 127 (full x-axis), but vertical only allowed to be max of 63 (full y-axis)
                 len = 63
             }
-            for (let n = y; n < (y + len); n++) //loop to set the pixel in the vertical line
-                setPixel(x, n, screen)
+            for (let vPixel = y; vPixel < (y + len); vPixel++)      // Loop to set the pixels in the vertical line
+                setPixel(x, vPixel, screen)
         }   
     }
 
     /**
-     * Draw a rectangle using the X and Y coordiantes as a starting point, then the width and height can be enter as the number of pixels
+     * Draw a rectangle with a specific width and height in pixels, using the (x, y) coordinates as a starting point
      * @param width is width of the rectangle, eg: 60
      * @param height is height of the rectangle, eg: 30
      * @param x is the start position on the X axis, eg: 0
@@ -563,12 +563,15 @@ namespace kitronik_VIEW128x64 {
     //% x.min=0 x.max=127
     //% y.min=0 y.max=63
     export function drawRect(width: number, height: number, x: number, y: number, screen?: 1) {        
-        if (!x)     //if variable x has not been used, default to x position of 0
+        if (!x){    // If variable 'x' has not been used, default to x position of 0
             x=0
+        }     
         
-        if (!y)     //if variable y has not been used, default to y position of 0
+        if (!y){    // If variable 'y' has not been used, default to y position of 0
             y=0
-        //draw the line of each side of the rectangle
+        }     
+            
+        // Draw the lines for each side of the rectangle
         drawLine(LineDirectionSelection.horizontal, width, x, y, screen)
         drawLine(LineDirectionSelection.horizontal, width, x, y + height, screen)
         drawLine(LineDirectionSelection.vertical, height, x, y, screen)
@@ -576,7 +579,7 @@ namespace kitronik_VIEW128x64 {
     }
 
     /**
-     * clear screen
+     * Clear all pixels, text and images on the screen
      * @param screen is screen selection when using multiple screens
      */
     //% blockId="VIEW128x64_clear" block="clear display"
@@ -588,15 +591,15 @@ namespace kitronik_VIEW128x64 {
             initDisplay(1)
         }
             
-        screenBuf.fill(0)       //fill the screenBuf with 0
+        screenBuf.fill(0)       // Fill the screenBuf with all '0'
         screenBuf[0] = 0x40
-        set_pos()               //set position to the start of the screen
-        pins.i2cWriteBuffer(displayAddress, screenBuf)  //write clear buffer to the screen
+        set_pos()               // Set position to the start of the screen
+        pins.i2cWriteBuffer(displayAddress, screenBuf)  // Write clear buffer to the screen
     }
 
     /**
-     * Turn display on and off. The information on the screen will be kept when display when turning on and off
-     * @param output is the boolean output of the pin, either ON or OFF
+     * Turn the screen on and off. The information on the screen will be kept when it is off, ready to be displayed again.
+     * @param displayOutput is the boolean setting for the screen, either ON or OFF
      * @param screen is screen selection when using multiple screens
      */
     //% blockId=VIEW128x64_display_on_off_control
@@ -611,10 +614,10 @@ namespace kitronik_VIEW128x64 {
         }
             
         if (displayOutput == true) {
-            writeOneByte(0xAF)      //turn display output on
+            writeOneByte(0xAF)      // Turn display output on
         }
         else {
-            writeOneByte(0xAE)      //turn display output off
+            writeOneByte(0xAE)      // Turn display output off
         }
     }
 
@@ -637,8 +640,8 @@ namespace kitronik_VIEW128x64 {
     //////////////////////////////////////
 
     /**
-     * Plot Request start or stops the plotting of the graph onto the display
-     * @plotVariable is the variable that the user requires to be recorded on a graph onto the display
+     * Start plotting a live graph of the chosen variable or input on the display 
+     * @param plotVariable is the variable to be recorded on a graph on the display
      * @param screen is screen selection when using multiple screens
      */
     //% blockId="VIEW128x64_plot_request"
@@ -652,25 +655,25 @@ namespace kitronik_VIEW128x64 {
         }
             
         let plotLength = plotArray.length
-        if (plotLength == 127){     //if the length of the array has reach max number of pixels, shift the array and remove the oldest
+        if (plotLength == 127){     // If the length of the array has reached the max number of pixels, shift the array and remove the oldest value
             plotArray.shift()
         }
-        //round the variable to use as ints rather than floats
+        // Round the variable to use ints rather than floats
         plotVariable = Math.round(plotVariable)
-        //place on the end of the array
+        // Add the value to the end of the array
         plotArray.push(plotVariable)
 
-        //if the varibale exceeds the scale of the Y axis, update the in or max limits
+        // If the variable exceeds the scale of the y axis, update the min or max limits
         if (plotVariable > graphYMax)
             graphYMax = plotVariable
         if (plotVariable < graphYMin)
             graphYMin = plotVariable
     
-        //plotting for loop of graph onto display
+        // 'for' loop plots the graph on the display
         for (let arrayPosition = 0; arrayPosition <= plotLength; arrayPosition++) {
-    	    let x3 = arrayPosition//x is start of screen 
+    	    let x3 = arrayPosition  // Start of the screen (x-axis)
             let yPlot = plotArray[arrayPosition]
-            //map the variables to scale between the min and max values to the min and max graph pixel area
+            // Map the variables to scale between the min and max values to the min and max graph pixel area
             yPlot = pins.map(yPlot, graphYMin, graphYMax, GRAPH_Y_MIN_LOCATION, GRAPH_Y_MAX_LOCATION)
 
             if (arrayPosition == 0){
@@ -679,7 +682,7 @@ namespace kitronik_VIEW128x64 {
             let y3 = 0
             let len = 0
 
-            //determine if the line needs to be drawn from the last point to the new or visa-versa, V line can only be drawn down the screen
+            // Determine if the line needs to be drawn from the last point to the new or visa-versa (vertical lines can only be drawn down the screen)
             if (yPlot < previousYPlot){
                 y3 = yPlot
                 len = (previousYPlot-yPlot)
@@ -693,27 +696,27 @@ namespace kitronik_VIEW128x64 {
                 len = 1
             }
 
-            //Clear plots in screenBuffer
+            // Clear plots in screenBuffer
             let page3 = 0
-            for (let o = GRAPH_Y_MAX_LOCATION; o <= GRAPH_Y_MIN_LOCATION; o++){
-                page3 = o >> 3
-                let shift_page3 = o % 8
+            for (let pixel = GRAPH_Y_MAX_LOCATION; pixel <= GRAPH_Y_MIN_LOCATION; pixel++){
+                page3 = pixel >> 3
+                let shift_page3 = pixel % 8
                 let ind5 = x3 + page3 * 128 + 1
-                let screenPixel3 = clearBit(screenBuf[ind5], shift_page3)    //clear the screen data byte
-                screenBuf[ind5] = screenPixel3                            //store data in screen buffer
+                let screenPixel3 = clearBit(screenBuf[ind5], shift_page3)   // Clear the screen data byte
+                screenBuf[ind5] = screenPixel3                              // Store data in screenBuffer
             }
 
-            //plot new data in screenBuffer
-            for (let p = y3; p < (y3 + len); p++){
-                page3 = p >> 3
-                let shift_page4 = p % 8
+            // Plot new data in screenBuffer
+            for (let pixel = y3; pixel < (y3 + len); pixel++){
+                page3 = pixel >> 3
+                let shift_page4 = pixel % 8
                 let ind6 = x3 + page3 * 128 + 1
-                let screenPixel4 = (screenBuf[ind6] | (1 << shift_page4))  //set the screen data byte
-                screenBuf[ind6] = screenPixel4                            //store data in screen buffer
+                let screenPixel4 = (screenBuf[ind6] | (1 << shift_page4))   // Set the screen data byte
+                screenBuf[ind6] = screenPixel4                              // Store data in screen buffer
             }
             previousYPlot = yPlot
         }
-        refresh() //refresh screen with new data in screenBuffer
+        refresh() // Refresh screen with new data in screenBuffer
     }
 
 
@@ -724,7 +727,7 @@ namespace kitronik_VIEW128x64 {
     //////////////////////////////////////
 
     /**
-     * Block will update or efresh the screen if any data has been changed
+     * Uupdate or refresh the screen if any data has been changed
      * @param screen is screen selection when using multiple screens
      */
     //% subcategory=advanced
@@ -742,7 +745,7 @@ namespace kitronik_VIEW128x64 {
     }
 
     /**
-     * invert display
+     * Invert the display colours (black to white, white to black)
      * @param output toggles between inverting the colours of the display
      */
     //% subcategory=advanced
@@ -756,7 +759,6 @@ namespace kitronik_VIEW128x64 {
             initDisplay(1)
         }
             
-        //let n = (output) ? 0xA7 : 0xA6
         if (output == true){
             invertRegisterValue = 0xA7
         }
