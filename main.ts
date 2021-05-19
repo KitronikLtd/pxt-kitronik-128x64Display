@@ -283,7 +283,7 @@ namespace kitronik_VIEW128x64 {
     }
 
     /**
-     * Using (x, y) coordinates, turn on a selected pixel on the display
+     * Using (x, y) coordinates, turn on a selected pixel on the screen.
      * @param x is the X axis value, eg: 0
      * @param y is the Y axis value, eg: 0
      * @param screen is screen selection when using multiple screens
@@ -312,7 +312,7 @@ namespace kitronik_VIEW128x64 {
     }
 
     /**
-     * Using the (x, y) coordinates, clear a selected pixel on the display
+     * Using the (x, y) coordinates, clear a selected pixel on the screen.
      * @param x is the X axis value, eg: 0
      * @param y is the Y axis value, eg: 0
      * @param screen is screen selection when using multiple screens
@@ -471,7 +471,7 @@ namespace kitronik_VIEW128x64 {
     }
 
     /**
-     * Clear a specific line on the screen (1 to 8)
+     * Clear a specific line on the screen (1 to 8).
      * @param line is line to clear, eg: 1
      * @param screen is screen selection when using multiple screens
      */
@@ -497,7 +497,7 @@ namespace kitronik_VIEW128x64 {
         let ind = 0
 
         for (let charOfString = 0; charOfString < NUMBER_OF_CHAR_PER_LINE; charOfString++) {
-            charDisplayBytes = font[32]
+            charDisplayBytes = font[32]         // SPACE
             for (let k = 0; k < 5; k++) {       // 'for' loop will take byte font array and load it into the correct register, then shift to the next byte to load into the next location
                 col = 0
                 for (let l = 0; l < 5; l++) {
@@ -509,16 +509,16 @@ namespace kitronik_VIEW128x64 {
                 screenBuf[ind] = col
             }
         }
-        set_pos(x * 5, y)                               //set the start position to write to
+        set_pos(x * 5, y)                               // Set the start position to write to
         let ind02 = x * 5 + y * 128
         let buf2 = screenBuf.slice(ind02, ind + 1)
         buf2[0] = 0x40
-        pins.i2cWriteBuffer(displayAddress, buf2)        //send data to the screen
+        pins.i2cWriteBuffer(displayAddress, buf2)        // Send data to the screen
 
     }
 
     /**
-     * Draw a line of a specific length in pixels, using the (x, y) coordinates as a starting point
+     * Draw a line of a specific length in pixels, using the (x, y) coordinates as a starting point.
      * @param lineDirection is the selection of either horizontal line or vertical line
      * @param x is start position on the X axis, eg: 0
      * @param y is start position on the Y axis, eg: 0
@@ -547,7 +547,7 @@ namespace kitronik_VIEW128x64 {
     }
 
     /**
-     * Draw a rectangle with a specific width and height in pixels, using the (x, y) coordinates as a starting point
+     * Draw a rectangle with a specific width and height in pixels, using the (x, y) coordinates as a starting point.
      * @param width is width of the rectangle, eg: 60
      * @param height is height of the rectangle, eg: 30
      * @param x is the start position on the X axis, eg: 0
@@ -579,7 +579,7 @@ namespace kitronik_VIEW128x64 {
     }
 
     /**
-     * Clear all pixels, text and images on the screen
+     * Clear all pixels, text and images on the screen.
      * @param screen is screen selection when using multiple screens
      */
     //% blockId="VIEW128x64_clear" block="clear display"
@@ -640,7 +640,7 @@ namespace kitronik_VIEW128x64 {
     //////////////////////////////////////
 
     /**
-     * Start plotting a live graph of the chosen variable or input on the display 
+     * Start plotting a live graph of the chosen variable or input on the screen. 
      * @param plotVariable is the variable to be recorded on a graph on the display
      * @param screen is screen selection when using multiple screens
      */
@@ -727,7 +727,7 @@ namespace kitronik_VIEW128x64 {
     //////////////////////////////////////
 
     /**
-     * Uupdate or refresh the screen if any data has been changed
+     * Update or refresh the screen if any data has been changed.
      * @param screen is screen selection when using multiple screens
      */
     //% subcategory=advanced
@@ -745,7 +745,7 @@ namespace kitronik_VIEW128x64 {
     }
 
     /**
-     * Invert the display colours (black to white, white to black)
+     * Invert the colours on the screen (black to white, white to black)
      * @param output toggles between inverting the colours of the display
      */
     //% subcategory=advanced
