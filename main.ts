@@ -221,7 +221,7 @@ namespace kitronik_VIEW128x64 {
         writeOneByte(0x10 | (col >> 4)) // upper start column address    
     }
 
-    // 
+    // Set the particular data byte on the screen for clearing
     function clearBit(d: number, b: number): number {
         if (d & (1 << b))
             d -= (1 << b)
