@@ -17,15 +17,14 @@ There is no setup required for the :VIEW 128x64 Display. Once the first block is
 ## Showing Numbers and Text on the Screen
 ### Step 1
 Within the Kitronik created blocks, there is a ``||kitronik_VIEW128x64.show||`` block with an empty field. This empty field allows the coder to add in any data type (e.g. text, numbers etc).  
-Lets start by inserting a ``||text:Text||`` block (under **Advanced**) into this field and typing a message.
+Lets start by inserting a ``||text:" "||`` block (under **Advanced**) into this field and typing a message.
 #### ~ tutorialhint
 ```blocks
 kitronik_VIEW128x64.show("Hello!")
 ```
 
 ```ghost
-basic.showString(convertToText(0))
-text.(" ")
+text = " "
 ```
 
 ### Step 2
