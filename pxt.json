@@ -1,6 +1,6 @@
 {
     "name": "pxt-kitronik-128x64display",
-    "version": "0.1.11",
+    "version": "0.2.0",
     "description": "",
     "dependencies": {
         "core": "*",
