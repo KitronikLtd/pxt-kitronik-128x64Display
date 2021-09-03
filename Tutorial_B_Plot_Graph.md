@@ -8,7 +8,7 @@
 Learn how to plot readings and draw graphs on the Kitronik :VIEW 128x64 Display.  
 Make sure that the BBC micro:bit is plugged into the :VIEW 128x64 Display and a micro USB is connected to the BBC micro:bit.  
 Once the hardware is setup, we can advance to the code.
-![128x64Display image](https://KitronikLtd.github.io/pxt-kitronik-128x64Display/assets/128x64Display.png)
+![128x64DisplayPlot image](https://KitronikLtd.github.io/pxt-kitronik-128x64Display/assets/128x64DisplayPlot.png)
 
 ### Starting up the Display @unplugged
 There is no setup required for the :VIEW 128x64 Display. Once the first block is in place, it will detect the display and do the required setup for you. This gives the perfect start to get coding straight away!  
