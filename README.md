@@ -1,7 +1,7 @@
 
 # Kitronik :VIEW 128x64 Display for BBC micro:bit
 
-## Use as Extension
+## Use as Extension and Tutorials
 
 This repository can be added as an **extension** in MakeCode.
 
@@ -9,6 +9,10 @@ This repository can be added as an **extension** in MakeCode.
 * click on **New Project**
 * click on **Extensions** under the gearwheel menu
 * search for "128x64Display" or enter **https://github.com/kitronikltd/pxt-kitronik-128x64display** and import
+
+There are additional tutorials to guide through how to use the blocks.
+[Tutorial - Setup and basic functions]  (https://makecode.microbit.org/#tutorial:github:kitronikltd/pxt-kitronik-128x64display/Tutorial_A_Setup_and_basic_function)
+[Tutorial - Plot a Graph] (https://makecode.microbit.org/#tutorial:github:kitronikltd/pxt-kitronik-128x64display/Tutorial_B_Plot_Graph)
 
 # pxt-kitronik-128x64Display Blocks
 
