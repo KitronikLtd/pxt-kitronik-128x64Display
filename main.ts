@@ -512,16 +512,49 @@ namespace kitronik_VIEW128x64 {
     //% group="Draw"
     //% x.min=0, x.max=127
     //% y.min=0, y.max=63
-    //% len.min=1, len.max=127
+    //% len.min=-127, len.max=127
     //% inlineInputMode=inline
     export function drawLine(lineDirection: LineDirectionSelection, len: number, x: number, y: number, screen?: 1) {
         if (lineDirection == LineDirectionSelection.horizontal){
+            if (len >= 128){ //check line length is not greater than screen length
+                len = 127       //if so, set to screen length max
+            }
+            else if (len < 0){  //check if the line is a negative number
+                if (len <= -128){   //limit to maximum screen length as a negative number
+                    len = -127      //set max negative line limit horizontal
+                }
+                len = Math.abs(len) //take absolute of the number for the length
+                x = x - len         //move the X point to the start of the line as drawing left to riight
+                if (x < 0){         //check if X is now a negative number
+                    len = len + x   //if so then length calulated to 0 point
+                    x = 0           //x is now 0
+                }
+            }
+
+            if ((x+len) > 127){     //check that the length of line from the X start point does not exceed the screen limits
+                len = 127 - x       //if so adjust length to the length from X to the end of screen
+            }
             for (let hPixel = x; hPixel < (x + len); hPixel++)      // Loop to set the pixels in the horizontal line
                 setPixel(hPixel, y, screen)
         }
         else if (lineDirection == LineDirectionSelection.vertical){
-            if (len >= 64){          // For horizontal, 'len' can be max of 127 (full x-axis), but vertical only allowed to be max of 63 (full y-axis)
-                len = 63
+            if (len >= 64){          // check for max vertical length
+                len = 63            //if so, set to screen height max
+            }
+            else if (len < 0) {     //check if the line is a negative number
+                if (len <= -63) {    //limit to maximum screen length as a negative number
+                    len = -63       //set max negative line limit vertically
+                }
+                len = Math.abs(len) //take absolute value of length and adjust the y value
+                y = y - len         //move the Y point to the start of the line as drawing left to riight
+                if (y < 0) {    //check the y has not gone below 0
+                    len = len + y   //if so then length calulated to 0 point
+                    y = 0           //y is now 0
+                }
+            }
+
+            if ((y + len) > 63) {   //check that the length of line from the Y start point does not exceed the screen limits
+                len = 63 - x        //if so adjust length to the length from X to the end of screen
             }
             for (let vPixel = y; vPixel < (y + len); vPixel++)      // Loop to set the pixels in the vertical line
                 setPixel(x, vPixel, screen)
