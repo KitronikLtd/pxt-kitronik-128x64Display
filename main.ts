@@ -469,8 +469,14 @@ namespace kitronik_VIEW128x64 {
 
                     ind = (x + charOfString) * 5 * fontZoom + y * 128 + k * fontZoom + 1
                     screenBuf[ind] = col
+
+                    if (fontZoom == 2) {
+
+                        screenBuf[ind + 1] = col
+                    }
                 }
             }
+            
             set_pos(x * 5, y)                               // Set the start position to write to
             let ind02 = x * 5 * fontZoom + y * 128
             let buf2 = screenBuf.slice(ind02, ind + 1)
