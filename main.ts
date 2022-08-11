@@ -395,7 +395,7 @@ namespace kitronik_VIEW128x64 {
         let spacePoint = 0
         let startOfString = 0
         let saveString = ""
-        numberOfCharPerLine = 26
+        // numberOfCharPerLine = 26
         if (inputString.length > numberOfCharPerLine){
             if (y == 7){
                 stringArray[numberOfStrings] = inputString.substr(0, (numberOfCharPerLine-1))
@@ -440,7 +440,7 @@ namespace kitronik_VIEW128x64 {
         let charDisplayBytes = 0
         let ind = 0
 
-        numberOfCharPerLine = 26
+        // numberOfCharPerLine = 26
 
         // Set text alignment, fill up the screenBuffer with data and send to the display
         for (let textLine = 0; textLine <= (numberOfStrings-1); textLine++)
