@@ -347,8 +347,8 @@ namespace kitronik_VIEW128x64 {
      * @param displayShowAlign is the alignment of the text, this can be left, centre or right
      * @param line is line the text to be started on, eg: 1
      * @param inputData is the text will be show
-     * @param screen is screen selection when using multiple screens
      * @param fontSize is the size that will be used for the text shown
+     * @param screen is screen selection when using multiple screens
      */
     //% blockId="VIEW128x64_show" block="show %s|| on line %line | with alignment: %displayShowAlign | and size: %fontSize""
     //% weight=80 blockGap=8
@@ -357,7 +357,7 @@ namespace kitronik_VIEW128x64 {
     //% inlineInputMode=inline
     //% line.min=1 line.max=8
     //% fontSize.min=1 fontSize.max=2
-    export function show(inputData: any,  line?: number, displayShowAlign?: ShowAlign, screen?: 1, fontSize?: number) {
+    export function show(inputData: any,  line?: number, displayShowAlign?: ShowAlign, fontSize?: number, screen?: 1) {
         let y = 0
         let x = 0
         let inputString = convertToText(inputData)
