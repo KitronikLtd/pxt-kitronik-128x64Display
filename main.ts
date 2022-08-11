@@ -159,8 +159,9 @@ namespace kitronik_VIEW128x64 {
         vertical
     }
 
-    // Constants for Display
-    let NUMBER_OF_CHAR_PER_LINE = 26
+    // Variables for Display
+    let numberOfCharPerLine = 26
+    let fontZoom = 1
 
     // Default address for the display
     let DISPLAY_ADDR_1 = 60
@@ -347,6 +348,7 @@ namespace kitronik_VIEW128x64 {
      * @param line is line the text to be started on, eg: 1
      * @param inputData is the text will be show
      * @param screen is screen selection when using multiple screens
+     * @param fontSize is the size that will be used for the text shown
      */
     //% blockId="VIEW128x64_show" block="show %s|| on line %line| with alignment: %displayShowAlign"
     //% weight=80 blockGap=8
@@ -354,7 +356,8 @@ namespace kitronik_VIEW128x64 {
     //% expandableArgumentMode="enable"
     //% inlineInputMode=inline
     //% line.min=1 line.max=8
-    export function show(inputData: any,  line?: number, displayShowAlign?: ShowAlign, screen?: 1) {
+    //% fontSize.min=1 fontSize.max=2
+    export function show(inputData: any,  line?: number, displayShowAlign?: ShowAlign, screen?: 1, fontSize?: number) {
         let y = 0
         let x = 0
         let inputString = convertToText(inputData)
@@ -378,6 +381,12 @@ namespace kitronik_VIEW128x64 {
             y = (line-1)
         }
 
+        // If font size not set, font zoom default to 1
+        if (fontSize) {
+            fontZoom = fontSize
+            numberOfCharPerLine = 26 / fontZoom
+        }
+
         // Sort text into lines
         let stringArray: string[] = []
         let numberOfStrings = 0
@@ -386,9 +395,9 @@ namespace kitronik_VIEW128x64 {
         let spacePoint = 0
         let startOfString = 0
         let saveString = ""
-        if (inputString.length > NUMBER_OF_CHAR_PER_LINE){
+        if (inputString.length > numberOfCharPerLine){
             if (y == 7){
-                stringArray[numberOfStrings] = inputString.substr(0, (NUMBER_OF_CHAR_PER_LINE-1))
+                stringArray[numberOfStrings] = inputString.substr(0, (numberOfCharPerLine-1))
                 numberOfStrings = 1
             }
             else{
@@ -396,7 +405,7 @@ namespace kitronik_VIEW128x64 {
                 {
                     if (inputString.charAt(spaceFinder) == " "){                                // Check whether the charector is a space, if so...
                         spacePoint = spaceFinder                                                // Remember the location of the new space found
-                        if ((spacePoint - startOfString) < NUMBER_OF_CHAR_PER_LINE){            // Check if the current location minus start of string is less than number of char on a screen
+                        if ((spacePoint - startOfString) < numberOfCharPerLine){            // Check if the current location minus start of string is less than number of char on a screen
                             previousSpacePoint = spacePoint                                     // Remember that point for later
                             if (spaceFinder == (inputString.length-1)){
                                 saveString = inputString.substr(startOfString, spacePoint)      // Cut the string from start of word to the last space and store it
@@ -404,13 +413,13 @@ namespace kitronik_VIEW128x64 {
                                 numberOfStrings += 1
                             }
                         }
-                        else if ((spacePoint - startOfString) > NUMBER_OF_CHAR_PER_LINE){       // Check if the current location minus start of string is greater than number of char on a screen
+                        else if ((spacePoint - startOfString) > numberOfCharPerLine){       // Check if the current location minus start of string is greater than number of char on a screen
                             saveString = inputString.substr(startOfString, previousSpacePoint)  // Cut the string from start of word to the last space and store it
                             stringArray[numberOfStrings] = saveString
                             startOfString = previousSpacePoint + 1                              // Set start of new word from last space plus one position
                             numberOfStrings += 1                                                // Increase the number of strings variable
                         }
-                        else if ((spacePoint - startOfString) == NUMBER_OF_CHAR_PER_LINE){      // Check if the current location minus start of string equals than number of char on a screen
+                        else if ((spacePoint - startOfString) == numberOfCharPerLine){      // Check if the current location minus start of string equals than number of char on a screen
                             saveString = inputString.substr(startOfString, spacePoint)
                             stringArray[numberOfStrings] = saveString
                             startOfString = spacePoint + 1
@@ -435,16 +444,16 @@ namespace kitronik_VIEW128x64 {
         {
             let displayString = stringArray[textLine]
 
-            if (inputString.length < (NUMBER_OF_CHAR_PER_LINE-1))
+            if (inputString.length < (numberOfCharPerLine-1))
             {
                 if (displayShowAlign == ShowAlign.Left){
                     x = 0
                 }
                 else if (displayShowAlign == ShowAlign.Centre){
-                    x = Math.round((NUMBER_OF_CHAR_PER_LINE - displayString.length) / 2)
+                    x = Math.round((numberOfCharPerLine - displayString.length) / 2)
                 }
                 else if(displayShowAlign == ShowAlign.Right){
-                    x = (NUMBER_OF_CHAR_PER_LINE - displayString.length - 1) + textLine
+                    x = (numberOfCharPerLine - displayString.length - 1) + textLine
                 }
             }
 
