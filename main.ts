@@ -159,8 +159,14 @@ namespace kitronik_VIEW128x64 {
         vertical
     }
 
+    export enum ZoomSelection {
+
+        normal,
+        big
+    }
+
     // Variables for Display
-    let numberOfCharPerLine = 26
+    let numberOfCharPerLine = 25
     let fontZoom = 1
 
     // Default address for the display
@@ -356,8 +362,7 @@ namespace kitronik_VIEW128x64 {
     //% expandableArgumentMode="enable"
     //% inlineInputMode=inline
     //% line.min=1 line.max=8
-    //% fontSize.min=1 fontSize.max=2
-    export function show(inputData: any,  line?: number, displayShowAlign?: ShowAlign, screen?: 1, fontSize?: number) {
+    export function show(inputData: any,  line?: number, displayShowAlign?: ShowAlign, screen?: 1, fontSize?: ZoomSelection) {
         let y = 0
         let x = 0
         let inputString = convertToText(inputData)
@@ -382,9 +387,9 @@ namespace kitronik_VIEW128x64 {
         }
 
         // If font size more than 1, otherwise font zoom default to 1
-        if (fontSize > 1) {
+        if (fontSize == ZoomSelection.big) {
             fontZoom = 2
-            numberOfCharPerLine = 13
+            numberOfCharPerLine = 12
         }
 
         // Sort text into lines
@@ -476,7 +481,7 @@ namespace kitronik_VIEW128x64 {
                     }
                 }
             }
-            
+
             set_pos(x * 5, y)                               // Set the start position to write to
             let ind02 = x * 5 * fontZoom + y * 128
             let buf2 = screenBuf.slice(ind02, ind + 1)
