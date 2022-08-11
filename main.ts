@@ -350,7 +350,7 @@ namespace kitronik_VIEW128x64 {
      * @param screen is screen selection when using multiple screens
      * @param fontSize is the size that will be used for the text shown
      */
-    //% blockId="VIEW128x64_show" block="show %s|| on line %line| with alignment: %displayShowAlign"
+    //% blockId="VIEW128x64_show" block="show %s|| on line %line | with alignment: %displayShowAlign | and size: %fontSize""
     //% weight=80 blockGap=8
     //% group="Show"
     //% expandableArgumentMode="enable"
@@ -382,9 +382,9 @@ namespace kitronik_VIEW128x64 {
         }
 
         // If font size not set, font zoom default to 1
-        if (fontSize) {
-            fontZoom = fontSize
-            numberOfCharPerLine = 26 / fontZoom
+        if (fontSize == 2) {
+            fontZoom = 2
+            numberOfCharPerLine = 13
         }
 
         // Sort text into lines
@@ -438,6 +438,8 @@ namespace kitronik_VIEW128x64 {
         let col = 0
         let charDisplayBytes = 0
         let ind = 0
+
+        numberOfCharPerLine = 26
 
         // Set text alignment, fill up the screenBuffer with data and send to the display
         for (let textLine = 0; textLine <= (numberOfStrings-1); textLine++)
