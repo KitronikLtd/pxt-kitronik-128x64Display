@@ -395,6 +395,7 @@ namespace kitronik_VIEW128x64 {
         let spacePoint = 0
         let startOfString = 0
         let saveString = ""
+        numberOfCharPerLine = 26
         if (inputString.length > numberOfCharPerLine){
             if (y == 7){
                 stringArray[numberOfStrings] = inputString.substr(0, (numberOfCharPerLine-1))
