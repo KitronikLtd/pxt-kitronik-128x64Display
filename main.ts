@@ -381,8 +381,8 @@ namespace kitronik_VIEW128x64 {
             y = (line-1)
         }
 
-        // If font size not set, font zoom default to 1
-        if (fontSize == 2) {
+        // If font size more than 1, otherwise font zoom default to 1
+        if (fontSize > 1) {
             fontZoom = 2
             numberOfCharPerLine = 13
         }
@@ -460,19 +460,19 @@ namespace kitronik_VIEW128x64 {
 
             for (let charOfString = 0; charOfString < displayString.length; charOfString++) {
                 charDisplayBytes = font[displayString.charCodeAt(charOfString)]
-                for (let k = 0; k < 10; k++) {  // 'for' loop will take byte font array and load it into the correct register, then shift to the next byte to load into the next location
+                for (let k = 0; k < 5; k++) {  // 'for' loop will take byte font array and load it into the correct register, then shift to the next byte to load into the next location
                     col = 0
-                    for (let l = 0; l < 10; l++) {
-                        if (charDisplayBytes & (1 << (10 * k + l)))
+                    for (let l = 0; l < 5; l++) {
+                        if (charDisplayBytes & (1 << (5 * k + l)))
                             col |= (1 << (l + 1))
                     }
 
-                    ind = (x + charOfString) * 10 + y * 128 + k + 1
+                    ind = (x + charOfString) * 5 * fontZoom + y * 128 + k * fontZoom + 1
                     screenBuf[ind] = col
                 }
             }
-            set_pos(x * 10, y)                               // Set the start position to write to
-            let ind02 = x * 10 + y * 128
+            set_pos(x * 5, y)                               // Set the start position to write to
+            let ind02 = x * 5 * fontZoom + y * 128
             let buf2 = screenBuf.slice(ind02, ind + 1)
             buf2[0] = 0x40
             pins.i2cWriteBuffer(displayAddress, buf2)       // Send data to the screen
