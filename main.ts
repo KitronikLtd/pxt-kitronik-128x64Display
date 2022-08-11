@@ -395,7 +395,7 @@ namespace kitronik_VIEW128x64 {
         let spacePoint = 0
         let startOfString = 0
         let saveString = ""
-        // numberOfCharPerLine = 26
+
         if (inputString.length > numberOfCharPerLine){
             if (y == 7){
                 stringArray[numberOfStrings] = inputString.substr(0, (numberOfCharPerLine-1))
@@ -440,8 +440,6 @@ namespace kitronik_VIEW128x64 {
         let charDisplayBytes = 0
         let ind = 0
 
-        // numberOfCharPerLine = 26
-
         // Set text alignment, fill up the screenBuffer with data and send to the display
         for (let textLine = 0; textLine <= (numberOfStrings-1); textLine++)
         {
@@ -464,7 +462,7 @@ namespace kitronik_VIEW128x64 {
                 charDisplayBytes = font[displayString.charCodeAt(charOfString)]
                 for (let k = 0; k < 10; k++) {  // 'for' loop will take byte font array and load it into the correct register, then shift to the next byte to load into the next location
                     col = 0
-                    for (let l = 0; l < 5; l++) {
+                    for (let l = 0; l < 10; l++) {
                         if (charDisplayBytes & (1 << (10 * k + l)))
                             col |= (1 << (l + 1))
                     }
