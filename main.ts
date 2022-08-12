@@ -445,13 +445,12 @@ namespace kitronik_VIEW128x64 {
                             col |= (1 << (l + 1))
                     }
 
+                    col = col * 2
                     ind = (x + charOfString) * 5 * fontZoom + y * 128 + k * fontZoom + 1
                     screenBuf[ind] = col
 
                     if (fontZoom > 1) {
                         screenBuf[ind + 1] = col
-                        screenBuf[ind + 2] = col
-                        screenBuf[ind + 3] = col
                     }
                 }
             }
