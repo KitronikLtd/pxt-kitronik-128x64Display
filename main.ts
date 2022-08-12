@@ -414,54 +414,6 @@ namespace kitronik_VIEW128x64 {
             }
         }
 
-        /*
-        let previousSpacePoint = 0
-        let spacePoint = 0
-        let startOfString = 0
-        let saveString = ""
-
-        
-        if (inputString.length > numberOfCharPerLine){
-            if (y == numberOfLines){
-                stringArray[numberOfStrings] = inputString.substr(0, (numberOfCharPerLine-1))
-                numberOfStrings = 1
-            }
-            else{
-                for (let spaceFinder = 0; spaceFinder <= inputString.length; spaceFinder++ )
-                {
-                    if (inputString.charAt(spaceFinder) == " "){                                // Check whether the charector is a space, if so...
-                        spacePoint = spaceFinder                                                // Remember the location of the new space found
-                        if ((spacePoint - startOfString) < numberOfCharPerLine){            // Check if the current location minus start of string is less than number of char on a screen
-                            previousSpacePoint = spacePoint                                     // Remember that point for later
-                            if (spaceFinder == (inputString.length-1)){
-                                saveString = inputString.substr(startOfString, spacePoint)      // Cut the string from start of word to the last space and store it
-                                stringArray[numberOfStrings] = saveString
-                                numberOfStrings += 1
-                            }
-                        }
-                        else if ((spacePoint - startOfString) > numberOfCharPerLine){       // Check if the current location minus start of string is greater than number of char on a screen
-                            saveString = inputString.substr(startOfString, previousSpacePoint)  // Cut the string from start of word to the last space and store it
-                            stringArray[numberOfStrings] = saveString
-                            startOfString = previousSpacePoint + 1                              // Set start of new word from last space plus one position
-                            numberOfStrings += 1                                                // Increase the number of strings variable
-                        }
-                        else if ((spacePoint - startOfString) == numberOfCharPerLine){      // Check if the current location minus start of string equals than number of char on a screen
-                            saveString = inputString.substr(startOfString, spacePoint)
-                            stringArray[numberOfStrings] = saveString
-                            startOfString = spacePoint + 1
-                            previousSpacePoint = spacePoint
-                            numberOfStrings += 1
-                        }
-                    }
-                }
-            }
-        }
-        else{
-            stringArray[numberOfStrings] = inputString
-            numberOfStrings += 1
-        }
-        */
-
         let col = 0
         let charDisplayBytes = 0
         let ind = 0
@@ -486,9 +438,9 @@ namespace kitronik_VIEW128x64 {
 
             for (let charOfString = 0; charOfString < displayString.length; charOfString++) {
                 charDisplayBytes = font[displayString.charCodeAt(charOfString)]
-                for (let k = 0; k < 5; k++) {  // 'for' loop will take byte font array and load it into the correct register, then shift to the next byte to load into the next location
+                for (let k = 0; k < 5 * fontZoom; k++) {  // 'for' loop will take byte font array and load it into the correct register, then shift to the next byte to load into the next location
                     col = 0
-                    for (let l = 0; l < 5 * fontZoom; l++) {
+                    for (let l = 0; l < 5; l++) {
                         if (charDisplayBytes & (1 << (5 * k + l)))
                             col |= (1 << (l + 1))
                     }
