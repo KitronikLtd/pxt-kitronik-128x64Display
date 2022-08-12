@@ -441,7 +441,7 @@ namespace kitronik_VIEW128x64 {
                 for (let k = 0; k < 5; k++) {  // 'for' loop will take byte font array and load it into the correct register, then shift to the next byte to load into the next location
                     col = 0
                     for (let l = 0; l < 5; l++) {
-                        if (charDisplayBytes & (1 << (5 * k + l)))
+                        if (charDisplayBytes & (1 << (5 * k + l * fontZoom)))
                             col |= (1 << (l * fontZoom + 1))
                     }
 
