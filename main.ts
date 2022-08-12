@@ -442,7 +442,7 @@ namespace kitronik_VIEW128x64 {
                     col = 0
                     for (let l = 0; l < 5; l++) {
                         if (charDisplayBytes & (2 << (5 * k + l)))
-                            col |= (2 << (l + 1))
+                            col |= (1 << (l + 1))
                     }
 
                     ind = (x + charOfString) * 5 * fontZoom + y * 128 + k * fontZoom + 1
