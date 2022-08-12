@@ -438,10 +438,10 @@ namespace kitronik_VIEW128x64 {
 
             for (let charOfString = 0; charOfString < displayString.length; charOfString++) {
                 charDisplayBytes = font[displayString.charCodeAt(charOfString)]
-                for (let k = 0; k < 5; k++) {  // 'for' loop will take byte font array and load it into the correct register, then shift to the next byte to load into the next location
+                for (let k = 0; k < 5 * fontZoom; k++) {  // 'for' loop will take byte font array and load it into the correct register, then shift to the next byte to load into the next location
                     col = 0
                     for (let l = 0; l < 5 * fontZoom; l++) {
-                        if (charDisplayBytes & (1 << (5 * k + l)))
+                        if (charDisplayBytes & (1 << (5 * k * fontZoom + l * fontZoom)))
                             col |= (1 << (l * fontZoom + 1 * fontZoom))
                     }
 
