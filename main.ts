@@ -159,8 +159,16 @@ namespace kitronik_VIEW128x64 {
         vertical
     }
 
+    export enum FontSelection {
+        //% block="Normal"
+        Normal,
+        //% block="Big"
+        Big
+    }
+
     // Variables for Display
     let numberOfCharPerLine = 25
+    let numberOfLines = 7
     let fontZoom = 1
 
     // Default address for the display
@@ -350,14 +358,13 @@ namespace kitronik_VIEW128x64 {
      * @param fontSize is the size that will be used for the text shown
      * @param screen is screen selection when using multiple screens
      */
-    //% blockId="VIEW128x64_show" block="show %s|| on line %line | with alignment: %displayShowAlign | and size: %fontSize""
+    //% blockId="VIEW128x64_show" block="show %s || on line %line | with alignment: %displayShowAlign | and size: %fontSize""
     //% weight=80 blockGap=8
     //% group="Show"
     //% expandableArgumentMode="enable"
     //% inlineInputMode=inline
     //% line.min=1 line.max=8
-    //% fontSize.min=1 fontSize.max=2
-    export function show(inputData: any,  line?: number, displayShowAlign?: ShowAlign, fontSize?: number, screen?: 1) {
+    export function show(inputData: any, line?: number, displayShowAlign?: ShowAlign, fontSize?: FontSelection, screen?: 1) {
         let y = 0
         let x = 0
         let inputString = convertToText(inputData)
@@ -378,26 +385,49 @@ namespace kitronik_VIEW128x64 {
             y=0
         }
         else{
-            y = (line-1)
+            y = (line - 1)
         }
 
-        // If font size more than 1, otherwise font zoom default to 1
-        if (fontSize > 1) {
-            fontZoom = 2
+        // If font size not selected font zoom default to 1
+        if (fontSize && fontSize == FontSelection.Big) {
+
             numberOfCharPerLine = 12
+            numberOfLines = 3
+            fontZoom = 2
+        }
+
+        if (y > numberOfLines) {
+            y = numberOfLines
         }
 
         // Sort text into lines
         let stringArray: string[] = []
         let numberOfStrings = 0
+        let i = 0
 
+        while (i < inputString.length) {
+
+            if (inputString.length - i <= numberOfCharPerLine) {
+
+                stringArray[numberOfStrings] = inputString.substr(i, inputString.length - i)
+                numberOfStrings++
+            } else {
+
+                stringArray[numberOfStrings] = inputString.substr(i, numberOfCharPerLine)
+                numberOfStrings++
+                i += numberOfCharPerLine
+            }
+        }
+
+        /*
         let previousSpacePoint = 0
         let spacePoint = 0
         let startOfString = 0
         let saveString = ""
 
+        
         if (inputString.length > numberOfCharPerLine){
-            if (y == 7){
+            if (y == numberOfLines){
                 stringArray[numberOfStrings] = inputString.substr(0, (numberOfCharPerLine-1))
                 numberOfStrings = 1
             }
@@ -435,17 +465,18 @@ namespace kitronik_VIEW128x64 {
             stringArray[numberOfStrings] = inputString
             numberOfStrings += 1
         }
+        */
 
         let col = 0
         let charDisplayBytes = 0
         let ind = 0
 
         // Set text alignment, fill up the screenBuffer with data and send to the display
-        for (let textLine = 0; textLine <= (numberOfStrings-1); textLine++)
+        for (let textLine = 0; textLine < numberOfStrings; textLine++)
         {
             let displayString = stringArray[textLine]
 
-            if (inputString.length < (numberOfCharPerLine-1))
+            if (displayString.length < numberOfCharPerLine)
             {
                 if (displayShowAlign == ShowAlign.Left){
                     x = 0
@@ -470,9 +501,10 @@ namespace kitronik_VIEW128x64 {
                     ind = (x + charOfString) * 5 * fontZoom + y * 128 + k * fontZoom + 1
                     screenBuf[ind] = col
 
-                    if (fontZoom == 2) {
+                    if (fontZoom > 1) {
 
-                        screenBuf[ind + 1] = col
+                        ind++
+                        screenBuf[ind] = col
                     }
                 }
             }
