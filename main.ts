@@ -411,6 +411,7 @@ namespace kitronik_VIEW128x64 {
 
                 stringArray[numberOfStrings] = inputString.substr(i, inputString.length - i)
                 numberOfStrings++
+                i = inputString.length
             } else {
 
                 stringArray[numberOfStrings] = inputString.substr(i, numberOfCharPerLine)
