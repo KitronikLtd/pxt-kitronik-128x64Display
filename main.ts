@@ -168,7 +168,6 @@ namespace kitronik_VIEW128x64 {
 
     // Variables for Display
     let numberOfCharPerLine = 25
-    let numberOfLines = 7
     let fontZoom = 1
 
     // Default address for the display
@@ -392,12 +391,7 @@ namespace kitronik_VIEW128x64 {
         if (fontSize && fontSize == FontSelection.Big) {
 
             numberOfCharPerLine = 12
-            numberOfLines = 3
             fontZoom = 2
-        }
-
-        if (y > numberOfLines) {
-            y = numberOfLines
         }
 
         // Sort text into lines
@@ -502,11 +496,9 @@ namespace kitronik_VIEW128x64 {
                     ind = (x + charOfString) * 5 * fontZoom + y * 128 + k * fontZoom + 1
                     screenBuf[ind] = col
 
-                    if (fontZoom > 1) {
-
-                        ind++
-                        screenBuf[ind] = col
-                    }
+                    // if (fontZoom > 1) {
+                    //     screenBuf[ind + 1] = col
+                    // }
                 }
             }
 
@@ -515,7 +507,12 @@ namespace kitronik_VIEW128x64 {
             let buf2 = screenBuf.slice(ind02, ind + 1)
             buf2[0] = 0x40
             pins.i2cWriteBuffer(displayAddress, buf2)       // Send data to the screen
-            y += 1 
+            
+            if (fontZoom > 1) {
+                y += 2
+            } else {
+                y++
+            }
         }
     }
 
