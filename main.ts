@@ -159,6 +159,9 @@ namespace kitronik_VIEW128x64 {
         vertical
     }
 
+    /**
+     * Select size for drawing text
+     */
     export enum FontSelection {
         //% block="Normal"
         Normal,
@@ -364,34 +367,37 @@ namespace kitronik_VIEW128x64 {
     //% inlineInputMode=inline
     //% line.min=1 line.max=8
     export function show(inputData: any, line?: number, displayShowAlign?: ShowAlign, fontSize?: FontSelection, screen?: 1) {
-        let y = 0
-        let x = 0
-        let inputString = convertToText(inputData)
-        inputString = inputString + " "
-        displayAddress = setScreenAddr(screen)
-        if (initialised == 0){
-            initDisplay(1)
-        } 
         
+        let x = 0
+        let y = 0
+        let inputString = convertToText(inputData)
+
+        displayAddress = setScreenAddr(screen)
+
+        if (initialised == 0)
+            initDisplay(1)
+
         // If text alignment has not been specified, default to "Left"
-        if (!displayShowAlign){     
-            displayShowAlign=ShowAlign.Left
-        }
+        if (!displayShowAlign)
+            displayShowAlign = ShowAlign.Left
 
         // If the screen line has not bee specified, default to top line (i.e. y = 0)
         // Otherwise, subtract '1' from the line number to return correct y value
-        if (!line){
-            y=0
-        }
-        else{
+        if (!line)
+            y = 0
+        
+        else
             y = (line - 1)
-        }
 
         // If font size not selected font zoom default to 1
         if (fontSize && fontSize == FontSelection.Big) {
 
             numberOfCharPerLine = 12
             fontZoom = 2
+        } else {
+
+            numberOfCharPerLine = 25
+            fontZoom = 1
         }
 
         // Sort text into lines
@@ -399,8 +405,7 @@ namespace kitronik_VIEW128x64 {
         let numberOfStrings = 0
         let i = 0
 
-        while (i < inputString.length) {
-
+        while (i < inputString.length)
             if (inputString.length - i <= numberOfCharPerLine) {
 
                 stringArray[numberOfStrings] = inputString.substr(i, inputString.length - i)
@@ -412,59 +417,84 @@ namespace kitronik_VIEW128x64 {
                 numberOfStrings++
                 i += numberOfCharPerLine
             }
-        }
 
-        let col = 0
-        let charDisplayBytes = 0
-        let ind = 0
+        let charBytes = 0
+        let column1 = 0
+        let column2 = 0
+        let bufferIndex = 0
 
         // Set text alignment, fill up the screenBuffer with data and send to the display
-        for (let textLine = 0; textLine < numberOfStrings; textLine++)
-        {
+        for (let textLine = 0; textLine < numberOfStrings; textLine++) {
+
             let displayString = stringArray[textLine]
 
             if (displayString.length < numberOfCharPerLine)
-            {
-                if (displayShowAlign == ShowAlign.Left){
+                if (displayShowAlign == ShowAlign.Left)
                     x = 0
-                }
-                else if (displayShowAlign == ShowAlign.Centre){
+                
+                else if (displayShowAlign == ShowAlign.Centre)
                     x = Math.round((numberOfCharPerLine - displayString.length) / 2)
-                }
-                else if(displayShowAlign == ShowAlign.Right){
-                    x = (numberOfCharPerLine - displayString.length - 1) + textLine
-                }
-            }
+                
+                else if (displayShowAlign == ShowAlign.Right)
+                    x = numberOfCharPerLine - displayString.length
 
             for (let charOfString = 0; charOfString < displayString.length; charOfString++) {
-                charDisplayBytes = font[displayString.charCodeAt(charOfString)]
-                for (let k = 0; k < 5; k++) {  // 'for' loop will take byte font array and load it into the correct register, then shift to the next byte to load into the next location
-                    col = 0
-                    for (let l = 0; l < 5; l++) {
-                        if (charDisplayBytes & (1 << (5 * k + l)))
-                            col |= (1 << (l * fontZoom + 1 * fontZoom))
+                
+                charBytes = font[displayString.charCodeAt(charOfString)]
+                
+                for (let xIndex = 0; xIndex < 5; xIndex++) {
+
+                    column1 = 0
+                    column2 = 0
+
+                    for (let yIndex = 0; yIndex < 5; yIndex++)
+                        if (charBytes & (1 << 5 * xIndex + yIndex))
+                            if (fontZoom == 1)
+                                column1 |= 1 << yIndex + 1
+
+                            else if (yIndex < 3) {
+
+                                column1 |= 1 << yIndex * fontZoom + 1
+                                column1 |= 1 << yIndex * fontZoom + 2
+                            } else if (yIndex == 3) {
+
+                                column1 |= 1 << yIndex * fontZoom + 1
+                                column2 |= 1 << (yIndex - 3) * fontZoom
+                            } else {
+
+                                column2 |= 1 << (yIndex - 4) * fontZoom + 1
+                                column2 |= 1 << (yIndex - 4) * fontZoom + 2
+                            }
+
+                    bufferIndex = (x + charOfString) * 5 * fontZoom + y * 128 + xIndex * fontZoom + 1
+
+                    if (fontZoom == 1)
+                        screenBuf[bufferIndex] = column1
+
+                    else {
+
+                        screenBuf[bufferIndex] = column1
+                        screenBuf[bufferIndex + 1] = column1
+                        screenBuf[bufferIndex + 128] = column2
+                        screenBuf[bufferIndex + 129] = column2
                     }
 
-                    ind = (x + charOfString) * 5 * fontZoom + y * 128 * fontZoom + k * fontZoom + 1 * fontZoom
-                    screenBuf[ind] = col
-
-                    if (fontZoom > 1) {
-                        screenBuf[ind + 1] = col
-                    }
+                    if (fontZoom == 2)
+                        bufferIndex += 129
                 }
-            }
+            }   
 
-            set_pos(x * 5, y)                               // Set the start position to write to
-            let ind02 = x * 5 * fontZoom + y * 128
-            let buf2 = screenBuf.slice(ind02, ind + 1)
+            set_pos(x * 5 * fontZoom, y)
+            let start = x * 5 * fontZoom + y * 128
+            let buf2 = screenBuf.slice(start, bufferIndex + 1)
             buf2[0] = 0x40
-            pins.i2cWriteBuffer(displayAddress, buf2)       // Send data to the screen
+            pins.i2cWriteBuffer(displayAddress, buf2)
             
-            if (fontZoom > 1) {
-                y += 2
-            } else {
+            if (fontZoom == 1)
                 y++
-            }
+            
+            else
+                y += 2
         }
     }
 
