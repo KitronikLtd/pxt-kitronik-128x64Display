@@ -455,10 +455,16 @@ namespace kitronik_VIEW128x64 {
         if (!line)
             y = 0
 
-        else if (fontZoom == 1)
+        else if (fontZoom == 1) {
+          
             y = line - 1
 
-        else {
+            if (y < 0)
+                y = 0
+            
+            if (y > 7)
+                y = 7
+        } else {
 
             if (line == 1)
                 y = 0
