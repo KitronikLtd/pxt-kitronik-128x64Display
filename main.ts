@@ -427,12 +427,23 @@ namespace kitronik_VIEW128x64 {
         if (!line)
             y = 0
 
-        else
-            if (globalZoomSet)
-                y = (line - 1) * fontZoom
+        else if (fontZoom == 1)
+            y = line - 1
+
+        else {
+
+            if (line == 1)
+                y = 0
+
+            else if (line == 2)
+                y = 2
+            
+            else if (line == 3)
+                y = 4
             
             else
-                y = line - 1
+                y = 6
+        }
 
         // Sort text into lines
         let stringArray: string[] = []
