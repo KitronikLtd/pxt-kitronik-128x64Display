@@ -159,8 +159,20 @@ namespace kitronik_VIEW128x64 {
         vertical
     }
 
-    // Constants for Display
-    let NUMBER_OF_CHAR_PER_LINE = 26
+    /**
+     * Select size for drawing text
+     */
+    export enum FontSelection {
+        //% block="Normal"
+        Normal,
+        //% block="Big"
+        Big
+    }
+
+    // Variables for Display
+    let numberOfCharPerLine = 25
+    let fontZoom = 1
+    let globalZoomSet = false
 
     // Default address for the display
     let DISPLAY_ADDR_1 = 60
@@ -169,7 +181,7 @@ namespace kitronik_VIEW128x64 {
 
     // Text alignment, defaulted to "Left"
     let displayShowAlign = ShowAlign.Left
-    
+
     // Plot variables
     let plotArray: number[] = []
     let plottingEnable = 0
@@ -182,7 +194,7 @@ namespace kitronik_VIEW128x64 {
     let previousYPlot = 0
 
     // Screen buffers for sending data to the display
-    let screenBuf = pins.createBuffer(1025); 
+    let screenBuf = pins.createBuffer(1025);
     let ackBuf = pins.createBuffer(2);
     let writeOneByteBuf = pins.createBuffer(2);
     let writeTwoByteBuf = pins.createBuffer(3);
@@ -231,15 +243,15 @@ namespace kitronik_VIEW128x64 {
     // Return the correct display I2C address based on selection
     function setScreenAddr(selection: number): number {
         let addr = 0
-        if (selection == 1){
+        if (selection == 1) {
             addr = DISPLAY_ADDR_1
-        }   
-        else if (selection == 2){
+        }
+        else if (selection == 2) {
             addr = DISPLAY_ADDR_2
         }
         else {
             addr = DISPLAY_ADDR_1
-        }     
+        }
         return addr
     }
 
@@ -248,16 +260,18 @@ namespace kitronik_VIEW128x64 {
      * @param screen is the selection of which screen to initialise
      */
     export function initDisplay(screen?: number): void {
-        
+
         displayAddress = setScreenAddr(screen)
         // Load the ackBuffer to check if there is a display there before starting initalisation
         ackBuf[0] = 0
         ackBuf[1] = 0xAF
         let ack = pins.i2cWriteBuffer(displayAddress, ackBuf)
-        if (ack == -1010){      // If returned value back is -1010, there is no display so show error message
+
+        if (ack == -1010)      // If returned value back is -1010, there is no display so show error message
             basic.showString("ERROR - no display")
-        }
-        else{   // Start initalising the display
+
+        else {   // Start initalising the display
+
             writeOneByte(0xAE)              // SSD1306_DISPLAYOFF
             writeOneByte(0xA4)              // SSD1306_DISPLAYALLON_RESUME
             writeTwoByte(0xD5, 0xF0)        // SSD1306_SETDISPLAYCLOCKDIV
@@ -295,12 +309,25 @@ namespace kitronik_VIEW128x64 {
     //% y.min=0, y.max=63
     //% inlineInputMode=inline
     export function setPixel(x: number, y: number, screen?: 1) {
-        displayAddress = setScreenAddr(screen)
-        if (initialised == 0){
-            initDisplay()
-        }
 
-        let page = y >> 3                                       
+        displayAddress = setScreenAddr(screen)
+
+        if (initialised == 0)
+            initDisplay()
+
+        if (x < 0)
+            x = 0
+        
+        if (x > 127)
+            x = 127
+
+        if (y < 0)
+            y = 0
+
+        if (y > 63)
+            y = 63
+
+        let page = y >> 3
         let shift_page = y % 8                                  // Calculate the page to write to
         let ind = x + page * 128 + 1                            // Calculate which register in the page to write to
         let screenPixel = (screenBuf[ind] | (1 << shift_page))  // Set the screen data byte
@@ -324,10 +351,23 @@ namespace kitronik_VIEW128x64 {
     //% y.min=0, y.max=63
     //% inlineInputMode=inline
     export function clearPixel(x: number, y: number, screen?: 1) {
+        
         displayAddress = setScreenAddr(screen)
-        if (initialised == 0){
+
+        if (initialised == 0)
             initDisplay(1)
-        }   
+
+        if (x < 0)
+            x = 0
+
+        if (x > 127)
+            x = 127
+
+        if (y < 0)
+            y = 0
+
+        if (y > 63)
+            y = 63
 
         let page2 = y >> 3
         let shift_page2 = y % 8                                     // Calculate the page to write to
@@ -341,132 +381,199 @@ namespace kitronik_VIEW128x64 {
     }
 
     /**
+     * Change the font size between normal and big. Font size is double in big.
+     * @param fontSize is the size that will be used for the text shown
+     * @param screen is screen selection when using multiple screens
+     */
+    //% blockId=VIEW128x64_set_font_size
+    //% block="Set font size to %fontSize"
+    //% group="Control"
+    //% weight=80 blockGap=8
+    export function setFontSize(fontSize: FontSelection, screen?: 1) {
+
+        displayAddress = setScreenAddr(screen)
+
+        if (initialised == 0)
+            initDisplay(1)
+
+        globalZoomSet = true
+
+        if (fontSize == FontSelection.Big) {
+
+            numberOfCharPerLine = 12
+            fontZoom = 2
+        } else {
+
+            numberOfCharPerLine = 25
+            fontZoom = 1
+        }
+    }
+
+    /**
      * 'show' allows any number, string or variable to be displayed on the screen.
      * The block is expandable to set the line and alignment.
      * @param displayShowAlign is the alignment of the text, this can be left, centre or right
      * @param line is line the text to be started on, eg: 1
      * @param inputData is the text will be show
+     * @param fontSize is the size that will be used for the text shown
      * @param screen is screen selection when using multiple screens
      */
-    //% blockId="VIEW128x64_show" block="show %s|| on line %line| with alignment: %displayShowAlign"
+    //% blockId="VIEW128x64_show" block="show %s || on line %line | with alignment: %displayShowAlign | and size: %fontSize""
     //% weight=80 blockGap=8
     //% group="Show"
     //% expandableArgumentMode="enable"
     //% inlineInputMode=inline
     //% line.min=1 line.max=8
-    export function show(inputData: any,  line?: number, displayShowAlign?: ShowAlign, screen?: 1) {
-        let y = 0
+    export function show(inputData: any, line?: number, displayShowAlign?: ShowAlign, fontSize?: FontSelection, screen?: 1) {
+
         let x = 0
+        let y = 0
         let inputString = convertToText(inputData)
-        inputString = inputString + " "
+
         displayAddress = setScreenAddr(screen)
-        if (initialised == 0){
+
+        if (initialised == 0)
             initDisplay(1)
-        } 
-        
+
         // If text alignment has not been specified, default to "Left"
-        if (!displayShowAlign){     
-            displayShowAlign=ShowAlign.Left
+        if (!displayShowAlign)
+            displayShowAlign = ShowAlign.Left
+
+        // If font size not selected font zoom default to 1
+        if (!globalZoomSet && fontSize && fontSize == FontSelection.Big) {
+
+            numberOfCharPerLine = 12
+            fontZoom = 2
+        } else if (!globalZoomSet) {
+
+            numberOfCharPerLine = 25
+            fontZoom = 1
         }
 
         // If the screen line has not bee specified, default to top line (i.e. y = 0)
         // Otherwise, subtract '1' from the line number to return correct y value
-        if (!line){
-            y=0
-        }
-        else{
-            y = (line-1)
+        if (!line)
+            y = 0
+
+        else if (fontZoom == 1) {
+          
+            y = line - 1
+
+            if (y < 0)
+                y = 0
+            
+            if (y > 7)
+                y = 7
+        } else {
+
+            if (line == 1)
+                y = 0
+
+            else if (line == 2)
+                y = 2
+            
+            else if (line == 3)
+                y = 4
+            
+            else
+                y = 6
         }
 
         // Sort text into lines
         let stringArray: string[] = []
         let numberOfStrings = 0
+        let i = 0
 
-        let previousSpacePoint = 0
-        let spacePoint = 0
-        let startOfString = 0
-        let saveString = ""
-        if (inputString.length > NUMBER_OF_CHAR_PER_LINE){
-            if (y == 7){
-                stringArray[numberOfStrings] = inputString.substr(0, (NUMBER_OF_CHAR_PER_LINE-1))
-                numberOfStrings = 1
-            }
-            else{
-                for (let spaceFinder = 0; spaceFinder <= inputString.length; spaceFinder++ )
-                {
-                    if (inputString.charAt(spaceFinder) == " "){                                // Check whether the charector is a space, if so...
-                        spacePoint = spaceFinder                                                // Remember the location of the new space found
-                        if ((spacePoint - startOfString) < NUMBER_OF_CHAR_PER_LINE){            // Check if the current location minus start of string is less than number of char on a screen
-                            previousSpacePoint = spacePoint                                     // Remember that point for later
-                            if (spaceFinder == (inputString.length-1)){
-                                saveString = inputString.substr(startOfString, spacePoint)      // Cut the string from start of word to the last space and store it
-                                stringArray[numberOfStrings] = saveString
-                                numberOfStrings += 1
-                            }
-                        }
-                        else if ((spacePoint - startOfString) > NUMBER_OF_CHAR_PER_LINE){       // Check if the current location minus start of string is greater than number of char on a screen
-                            saveString = inputString.substr(startOfString, previousSpacePoint)  // Cut the string from start of word to the last space and store it
-                            stringArray[numberOfStrings] = saveString
-                            startOfString = previousSpacePoint + 1                              // Set start of new word from last space plus one position
-                            numberOfStrings += 1                                                // Increase the number of strings variable
-                        }
-                        else if ((spacePoint - startOfString) == NUMBER_OF_CHAR_PER_LINE){      // Check if the current location minus start of string equals than number of char on a screen
-                            saveString = inputString.substr(startOfString, spacePoint)
-                            stringArray[numberOfStrings] = saveString
-                            startOfString = spacePoint + 1
-                            previousSpacePoint = spacePoint
-                            numberOfStrings += 1
-                        }
-                    }
-                }
-            }
-        }
-        else{
-            stringArray[numberOfStrings] = inputString
-            numberOfStrings += 1
-        }
+        while (i < inputString.length)
+            if (inputString.length - i <= numberOfCharPerLine) {
 
-        let col = 0
-        let charDisplayBytes = 0
-        let ind = 0
+                stringArray[numberOfStrings] = inputString.substr(i, inputString.length - i)
+                numberOfStrings++
+                i = inputString.length
+            } else {
+
+                stringArray[numberOfStrings] = inputString.substr(i, numberOfCharPerLine)
+                numberOfStrings++
+                i += numberOfCharPerLine
+            }
+
+        let charBytes = 0
+        let column1 = 0
+        let column2 = 0
+        let bufferIndex = 0
 
         // Set text alignment, fill up the screenBuffer with data and send to the display
-        for (let textLine = 0; textLine <= (numberOfStrings-1); textLine++)
-        {
+        for (let textLine = 0; textLine < numberOfStrings; textLine++) {
+
             let displayString = stringArray[textLine]
 
-            if (inputString.length < (NUMBER_OF_CHAR_PER_LINE-1))
-            {
-                if (displayShowAlign == ShowAlign.Left){
+            if (displayString.length < numberOfCharPerLine)
+                if (displayShowAlign == ShowAlign.Left)
                     x = 0
-                }
-                else if (displayShowAlign == ShowAlign.Centre){
-                    x = Math.round((NUMBER_OF_CHAR_PER_LINE - displayString.length) / 2)
-                }
-                else if(displayShowAlign == ShowAlign.Right){
-                    x = (NUMBER_OF_CHAR_PER_LINE - displayString.length - 1) + textLine
-                }
-            }
+
+                else if (displayShowAlign == ShowAlign.Centre)
+                    x = Math.round((numberOfCharPerLine - displayString.length) / 2)
+
+                else if (displayShowAlign == ShowAlign.Right)
+                    x = numberOfCharPerLine - displayString.length
 
             for (let charOfString = 0; charOfString < displayString.length; charOfString++) {
-                charDisplayBytes = font[displayString.charCodeAt(charOfString)]
-                for (let k = 0; k < 5; k++) {  // 'for' loop will take byte font array and load it into the correct register, then shift to the next byte to load into the next location
-                    col = 0
-                    for (let l = 0; l < 5; l++) {
-                        if (charDisplayBytes & (1 << (5 * k + l)))
-                            col |= (1 << (l + 1))
+
+                charBytes = font[displayString.charCodeAt(charOfString)]
+
+                for (let xIndex = 0; xIndex < 5; xIndex++) {
+
+                    column1 = 0
+                    column2 = 0
+
+                    for (let yIndex = 0; yIndex < 5; yIndex++)
+                        if (charBytes & (1 << 5 * xIndex + yIndex))
+                            if (fontZoom == 1)
+                                column1 |= 1 << yIndex + 1
+
+                            else if (yIndex < 3) {
+
+                                column1 |= 1 << yIndex * fontZoom + 1
+                                column1 |= 1 << yIndex * fontZoom + 2
+                            } else if (yIndex == 3) {
+
+                                column1 |= 1 << yIndex * fontZoom + 1
+                                column2 |= 1 << (yIndex - 3) * fontZoom
+                            } else {
+
+                                column2 |= 1 << (yIndex - 4) * fontZoom + 1
+                                column2 |= 1 << (yIndex - 4) * fontZoom + 2
+                            }
+
+                    bufferIndex = (x + charOfString) * 5 * fontZoom + y * 128 + xIndex * fontZoom + 1
+
+                    if (fontZoom == 1)
+                        screenBuf[bufferIndex] = column1
+
+                    else {
+
+                        screenBuf[bufferIndex] = column1
+                        screenBuf[bufferIndex + 1] = column1
+                        screenBuf[bufferIndex + 128] = column2
+                        screenBuf[bufferIndex + 129] = column2
                     }
 
-                    ind = (x + charOfString) * 5 + y * 128 + k + 1
-                    screenBuf[ind] = col
+                    if (fontZoom == 2)
+                        bufferIndex += 129
                 }
             }
-            set_pos(x * 5, y)                               // Set the start position to write to
-            let ind02 = x * 5 + y * 128
-            let buf2 = screenBuf.slice(ind02, ind + 1)
+
+            set_pos(x * 5 * fontZoom, y)
+            let start = x * 5 * fontZoom + y * 128
+            let buf2 = screenBuf.slice(start, bufferIndex + 1)
             buf2[0] = 0x40
-            pins.i2cWriteBuffer(displayAddress, buf2)       // Send data to the screen
-            y += 1 
+            pins.i2cWriteBuffer(displayAddress, buf2)
+
+            if (fontZoom == 1)
+                y++
+
+            else
+                y += 2
         }
     }
 
@@ -482,21 +589,17 @@ namespace kitronik_VIEW128x64 {
     //% inlineInputMode=inline
     //% line.min=1 line.max=8
     export function clearLine(line: number, screen?: 1) {
-        let y = 0
-        let x = 0
+ 
         displayAddress = setScreenAddr(screen)
-        if (initialised == 0){
+
+        if (initialised == 0)
             initDisplay(1)
-        } 
 
-        // Subtract '1' from the line number to return correct y value
-        y = (line-1)
+        if (fontZoom == 1)
+            show("                         ", line)
 
-        let col = 0
-        let charDisplayBytes = 0
-        let ind = 0
-
-        show("                          ", line) // Write 26 spaces to the selected line to clear it
+        else
+            show("            ", line)
     }
 
     /**
@@ -515,50 +618,70 @@ namespace kitronik_VIEW128x64 {
     //% len.min=-127, len.max=127
     //% inlineInputMode=inline
     export function drawLine(lineDirection: LineDirectionSelection, len: number, x: number, y: number, screen?: 1) {
-        if (lineDirection == LineDirectionSelection.horizontal){
-            if (len >= 128){ //check line length is not greater than screen length
+
+        if (x < 0)
+            x = 0
+
+        if (x > 127)
+            x = 127
+
+        if (y < 0)
+            y = 0
+
+        if (y > 63)
+            y = 63
+
+        if (lineDirection == LineDirectionSelection.horizontal) {
+
+            if (len > 127) //check line length is not greater than screen length
                 len = 127       //if so, set to screen length max
-            }
-            else if (len < 0){  //check if the line is a negative number
-                if (len <= -128){   //limit to maximum screen length as a negative number
+
+            else if (len < 0) {  //check if the line is a negative number
+
+                if (len <= -128)   //limit to maximum screen length as a negative number
                     len = -127      //set max negative line limit horizontal
-                }
+
                 len = Math.abs(len) //take absolute of the number for the length
                 x = x - len         //move the X point to the start of the line as drawing left to riight
-                if (x < 0){         //check if X is now a negative number
+
+                if (x < 0) {         //check if X is now a negative number
+
                     len = len + x   //if so then length calulated to 0 point
                     x = 0           //x is now 0
                 }
             }
 
-            if ((x+len) > 127){     //check that the length of line from the X start point does not exceed the screen limits
+            if ((x + len) > 127)     //check that the length of line from the X start point does not exceed the screen limits
                 len = 127 - x       //if so adjust length to the length from X to the end of screen
-            }
+            
             for (let hPixel = x; hPixel < (x + len); hPixel++)      // Loop to set the pixels in the horizontal line
                 setPixel(hPixel, y, screen)
-        }
-        else if (lineDirection == LineDirectionSelection.vertical){
-            if (len >= 64){          // check for max vertical length
+        } else if (lineDirection == LineDirectionSelection.vertical) {
+
+            if (len >= 64)          // check for max vertical length
                 len = 63            //if so, set to screen height max
-            }
+            
             else if (len < 0) {     //check if the line is a negative number
-                if (len <= -63) {    //limit to maximum screen length as a negative number
+
+                if (len <= -63)    //limit to maximum screen length as a negative number
                     len = -63       //set max negative line limit vertically
-                }
+                
                 len = Math.abs(len) //take absolute value of length and adjust the y value
                 y = y - len         //move the Y point to the start of the line as drawing left to riight
+                
                 if (y < 0) {    //check the y has not gone below 0
+
                     len = len + y   //if so then length calulated to 0 point
                     y = 0           //y is now 0
                 }
             }
 
-            if ((y + len) > 63) {   //check that the length of line from the Y start point does not exceed the screen limits
-                len = 63 - x        //if so adjust length to the length from X to the end of screen
-            }
+            if ((y + len) > 63)   //check that the length of line from the Y start point does not exceed the screen limits
+                len = 63 - y        //if so adjust length to the length from X to the end of screen
+            
             for (let vPixel = y; vPixel < (y + len); vPixel++)      // Loop to set the pixels in the vertical line
                 setPixel(x, vPixel, screen)
-        }   
+        }
     }
 
     /**
@@ -577,15 +700,14 @@ namespace kitronik_VIEW128x64 {
     //% height.min=1 height.max=63
     //% x.min=0 x.max=127
     //% y.min=0 y.max=63
-    export function drawRect(width: number, height: number, x: number, y: number, screen?: 1) {        
-        if (!x){    // If variable 'x' has not been used, default to x position of 0
-            x=0
-        }     
-        
-        if (!y){    // If variable 'y' has not been used, default to y position of 0
-            y=0
-        }     
-            
+    export function drawRect(width: number, height: number, x: number, y: number, screen?: 1) {
+
+        if (!x)    // If variable 'x' has not been used, default to x position of 0
+            x = 0
+
+        if (!y)    // If variable 'y' has not been used, default to y position of 0
+            y = 0
+
         // Draw the lines for each side of the rectangle
         drawLine(LineDirectionSelection.horizontal, width, x, y, screen)
         drawLine(LineDirectionSelection.horizontal, width, x, y + height, screen)
@@ -601,11 +723,12 @@ namespace kitronik_VIEW128x64 {
     //% group="Delete"
     //% weight=63 blockGap=8
     export function clear(screen?: number) {
+
         displayAddress = setScreenAddr(screen)
-        if (initialised == 0){
+
+        if (initialised == 0) 
             initDisplay(1)
-        }
-            
+
         screenBuf.fill(0)       // Fill the screenBuf with all '0'
         screenBuf[0] = 0x40
         set_pos()               // Set position to the start of the screen
@@ -623,17 +746,17 @@ namespace kitronik_VIEW128x64 {
     //% expandableArgumentMode="toggle"
     //% weight=80 blockGap=8
     export function controlDisplayOnOff(displayOutput: boolean, screen?: 1) {
+
         displayAddress = setScreenAddr(screen)
-        if (initialised == 0){
+
+        if (initialised == 0) 
             initDisplay(1)
-        }
-            
-        if (displayOutput == true) {
+
+        if (displayOutput == true)
             writeOneByte(0xAF)      // Turn display output on
-        }
-        else {
+
+        else
             writeOneByte(0xAE)      // Turn display output off
-        }
     }
 
     /**
@@ -664,15 +787,17 @@ namespace kitronik_VIEW128x64 {
     //% block="plot %plotVariable| onto display"
     //% weight=100 blockGap=8
     export function plot(plotVariable: number, screen?: 1) {
+
         displayAddress = setScreenAddr(screen)
-        if (initialised == 0){
+
+        if (initialised == 0)
             initDisplay(1)
-        }
-            
+
         let plotLength = plotArray.length
-        if (plotLength == 127){     // If the length of the array has reached the max number of pixels, shift the array and remove the oldest value
+
+        if (plotLength == 127)     // If the length of the array has reached the max number of pixels, shift the array and remove the oldest value
             plotArray.shift()
-        }
+
         // Round the variable to use ints rather than floats
         plotVariable = Math.round(plotVariable)
         // Add the value to the end of the array
@@ -681,39 +806,45 @@ namespace kitronik_VIEW128x64 {
         // If the variable exceeds the scale of the y axis, update the min or max limits
         if (plotVariable > graphYMax)
             graphYMax = plotVariable
+
         if (plotVariable < graphYMin)
             graphYMin = plotVariable
-    
+
         // 'for' loop plots the graph on the display
         for (let arrayPosition = 0; arrayPosition <= plotLength; arrayPosition++) {
-    	    let x3 = arrayPosition  // Start of the screen (x-axis)
+
+            let x3 = arrayPosition  // Start of the screen (x-axis)
             let yPlot = plotArray[arrayPosition]
+
             // Map the variables to scale between the min and max values to the min and max graph pixel area
             yPlot = pins.map(yPlot, graphYMin, graphYMax, GRAPH_Y_MIN_LOCATION, GRAPH_Y_MAX_LOCATION)
 
-            if (arrayPosition == 0){
+            if (arrayPosition == 0)
                 previousYPlot = yPlot
-            }
+            
             let y3 = 0
             let len = 0
 
             // Determine if the line needs to be drawn from the last point to the new or visa-versa (vertical lines can only be drawn down the screen)
-            if (yPlot < previousYPlot){
+            if (yPlot < previousYPlot) {
+
                 y3 = yPlot
-                len = (previousYPlot-yPlot)
-            }
-            else if (yPlot > previousYPlot){
+                len = (previousYPlot - yPlot)
+            } else if (yPlot > previousYPlot) {
+
                 y3 = previousYPlot
-                len = (yPlot-previousYPlot)
-            }
-            else {
+                len = (yPlot - previousYPlot)
+            } else {
+
                 y3 = yPlot
                 len = 1
             }
 
             // Clear plots in screenBuffer
             let page3 = 0
-            for (let pixel = GRAPH_Y_MAX_LOCATION; pixel <= GRAPH_Y_MIN_LOCATION; pixel++){
+
+            for (let pixel = GRAPH_Y_MAX_LOCATION; pixel <= GRAPH_Y_MIN_LOCATION; pixel++) {
+
                 page3 = pixel >> 3
                 let shift_page3 = pixel % 8
                 let ind5 = x3 + page3 * 128 + 1
@@ -722,15 +853,18 @@ namespace kitronik_VIEW128x64 {
             }
 
             // Plot new data in screenBuffer
-            for (let pixel = y3; pixel < (y3 + len); pixel++){
+            for (let pixel = y3; pixel < (y3 + len); pixel++) {
+
                 page3 = pixel >> 3
                 let shift_page4 = pixel % 8
                 let ind6 = x3 + page3 * 128 + 1
                 let screenPixel4 = (screenBuf[ind6] | (1 << shift_page4))   // Set the screen data byte
                 screenBuf[ind6] = screenPixel4                              // Store data in screen buffer
             }
+            
             previousYPlot = yPlot
         }
+
         refresh() // Refresh screen with new data in screenBuffer
     }
 
@@ -745,16 +879,16 @@ namespace kitronik_VIEW128x64 {
      * Update or refresh the screen if any data has been changed.
      * @param screen is screen selection when using multiple screens
      */
-    //% subcategory=advanced
     //% group="Control"
     //% blockId="VIEW128x64_draw" block="refresh display"
     //% weight=63 blockGap=8
     export function refresh(screen?: 1) {
+
         displayAddress = setScreenAddr(screen)
-        if (initialised == 0){
+
+        if (initialised == 0)
             initDisplay(1)
-        }
-            
+
         set_pos()
         pins.i2cWriteBuffer(displayAddress, screenBuf)
     }
@@ -763,24 +897,24 @@ namespace kitronik_VIEW128x64 {
      * Invert the colours on the screen (black to white, white to black)
      * @param output toggles between inverting the colours of the display
      */
-    //% subcategory=advanced
     //% group="Control"
     //% blockId="VIEW128x64_invert_screen" block="inverted display %output=on_off_toggle"
     //% weight=62 blockGap=8
     export function invert(output: boolean, screen?: 1) {
+
         let invertRegisterValue = 0
+
         displayAddress = setScreenAddr(screen)
-        if (initialised == 0){
+
+        if (initialised == 0)
             initDisplay(1)
-        }
-            
-        if (output == true){
+
+        if (output == true)
             invertRegisterValue = 0xA7
-        }
-        else{
-           invertRegisterValue = 0xA6 
-        }
+        
+        else
+            invertRegisterValue = 0xA6
+        
         writeOneByte(invertRegisterValue)
     }
-
 }
