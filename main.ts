@@ -879,7 +879,6 @@ namespace kitronik_VIEW128x64 {
      * Update or refresh the screen if any data has been changed.
      * @param screen is screen selection when using multiple screens
      */
-    //% subcategory=advanced
     //% group="Control"
     //% blockId="VIEW128x64_draw" block="refresh display"
     //% weight=63 blockGap=8
@@ -898,7 +897,6 @@ namespace kitronik_VIEW128x64 {
      * Invert the colours on the screen (black to white, white to black)
      * @param output toggles between inverting the colours of the display
      */
-    //% subcategory=advanced
     //% group="Control"
     //% blockId="VIEW128x64_invert_screen" block="inverted display %output=on_off_toggle"
     //% weight=62 blockGap=8
