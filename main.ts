@@ -3,7 +3,7 @@
  * OLED chip SSD1603
  **/
 //% weight=100 color=#00A654 icon="\uf26c" block="128x64 Display"
-//% groups='["Control", "Show", "Draw", "Delete"]'
+//% groups='["컨트롤", "보이기", "그리기", "지우기"]'
 namespace kitronik_VIEW128x64 {
     // ASCII Code to OLED 5x8 pixel character for display conversion
     let font: number[] = [];
@@ -141,11 +141,11 @@ namespace kitronik_VIEW128x64 {
      * Select the alignment of text
      */
     export enum ShowAlign {
-        //% block="Left"
+        //% block="왼쪽"
         Left,
-        //% block="Centre"
+        //% block="가운데"
         Centre,
-        //% block="Right"
+        //% block="오른쪽"
         Right
     }
 
@@ -153,9 +153,9 @@ namespace kitronik_VIEW128x64 {
      * Select direction for drawing lines
      */
     export enum LineDirectionSelection {
-        //% block="horizontal"
+        //% block="수평"
         horizontal,
-        //% block="vertical"
+        //% block="수직"
         vertical
     }
 
@@ -163,9 +163,9 @@ namespace kitronik_VIEW128x64 {
      * Select size for drawing text
      */
     export enum FontSelection {
-        //% block="Normal"
+        //% block="작게"
         Normal,
-        //% block="Big"
+        //% block="크게"
         Big
     }
 
@@ -302,8 +302,8 @@ namespace kitronik_VIEW128x64 {
      * @param y is the Y axis value, eg: 0
      * @param screen is screen selection when using multiple screens
      */
-    //% blockId="VIEW128x64_set_pixel" block="show pixel at x %x|y %y"
-    //% group="Show"
+    //% blockId="VIEW128x64_set_pixel" block="픽셀 보이기: 위치 x %x|y %y"
+    //% group="보이기"
     //% weight=70 blockGap=8
     //% x.min=0, x.max=127
     //% y.min=0, y.max=63
@@ -344,8 +344,8 @@ namespace kitronik_VIEW128x64 {
      * @param y is the Y axis value, eg: 0
      * @param screen is screen selection when using multiple screens
      */
-    //% blockId="VIEW128x64_clear_pixel" block="clear pixel at x %x|y %y"
-    //% group="Delete"
+    //% blockId="VIEW128x64_clear_pixel" block="픽셀 지우기: x %x|y %y"
+    //% group="지우기"
     //% weight=70 blockGap=8
     //% x.min=0, x.max=127
     //% y.min=0, y.max=63
@@ -386,8 +386,8 @@ namespace kitronik_VIEW128x64 {
      * @param screen is screen selection when using multiple screens
      */
     //% blockId=VIEW128x64_set_font_size
-    //% block="Set font size to %fontSize"
-    //% group="Control"
+    //% block="글꼴 크기 설정: %fontSize"
+    //% group="컨트롤"
     //% weight=80 blockGap=8
     export function setFontSize(fontSize: FontSelection, screen?: 1) {
 
@@ -418,9 +418,9 @@ namespace kitronik_VIEW128x64 {
      * @param fontSize is the size that will be used for the text shown
      * @param screen is screen selection when using multiple screens
      */
-    //% blockId="VIEW128x64_show" block="show %s || on line %line | with alignment: %displayShowAlign | and size: %fontSize""
+    //% blockId="VIEW128x64_show" block="보이기 %s || 줄 위치: %line | , 정렬: %displayShowAlign | , 크기: %fontSize""
     //% weight=80 blockGap=8
-    //% group="Show"
+    //% group="보이기"
     //% expandableArgumentMode="enable"
     //% inlineInputMode=inline
     //% line.min=1 line.max=8
@@ -582,9 +582,9 @@ namespace kitronik_VIEW128x64 {
      * @param line is line to clear, eg: 1
      * @param screen is screen selection when using multiple screens
      */
-    //% blockId="VIEW128x64_clear_line" block="clear line %line"
+    //% blockId="VIEW128x64_clear_line" block="줄 지우기: %line"
     //% weight=80 blockGap=8
-    //% group="Delete"
+    //% group="지우기"
     //% expandableArgumentMode="enable"
     //% inlineInputMode=inline
     //% line.min=1 line.max=8
@@ -610,9 +610,9 @@ namespace kitronik_VIEW128x64 {
      * @param len is the length of line, length is the number of pixels, eg: 10
      * @param screen is screen selection when using multiple screens
      */
-    //% blockId="VIEW128x64_draw_line" block="draw a %lineDirection | line with length of %len starting at x %x|y %y"
+    //% blockId="VIEW128x64_draw_line" block="선 그리기 방향: %lineDirection | , 길이: %len , 위치: x %x|y %y"
     //% weight=72 blockGap=8
-    //% group="Draw"
+    //% group="그리기"
     //% x.min=0, x.max=127
     //% y.min=0, y.max=63
     //% len.min=-127, len.max=127
@@ -692,9 +692,9 @@ namespace kitronik_VIEW128x64 {
      * @param y is the start position on the Y axis, eg: 0
      * @param screen is screen selection when using multiple screens
      */
-    //% blockId="VIEW128x64_draw_rect" block="draw a rectangle %width|wide %height|high from position x %x|y %y"
+    //% blockId="VIEW128x64_draw_rect" block="사각형 그리기: 가로 %width|부터 높이 %height|까지, 위치 x %x|y %y"
     //% weight=71 blockGap=8
-    //% group="Draw"
+    //% group="그리기"
     //% inlineInputMode=inline
     //% width.min=1 width.max=127
     //% height.min=1 height.max=63
@@ -719,8 +719,8 @@ namespace kitronik_VIEW128x64 {
      * Clear all pixels, text and images on the screen.
      * @param screen is screen selection when using multiple screens
      */
-    //% blockId="VIEW128x64_clear" block="clear display"
-    //% group="Delete"
+    //% blockId="VIEW128x64_clear" block="화면 지우기"
+    //% group="지우기"
     //% weight=63 blockGap=8
     export function clear(screen?: number) {
 
@@ -741,8 +741,8 @@ namespace kitronik_VIEW128x64 {
      * @param screen is screen selection when using multiple screens
      */
     //% blockId=VIEW128x64_display_on_off_control
-    //% block="turn %displayOutput=on_off_toggle| display"
-    //% group="Control"
+    //% block="화면 %displayOutput=on_off_toggle| 실행"
+    //% group="컨트롤"
     //% expandableArgumentMode="toggle"
     //% weight=80 blockGap=8
     export function controlDisplayOnOff(displayOutput: boolean, screen?: 1) {
@@ -783,8 +783,8 @@ namespace kitronik_VIEW128x64 {
      * @param screen is screen selection when using multiple screens
      */
     //% blockId="VIEW128x64_plot_request"
-    //% group="Draw"
-    //% block="plot %plotVariable| onto display"
+    //% group="그리기"
+    //% block="플롯 그래프: 높이 %plotVariable| 까지 그리기"
     //% weight=100 blockGap=8
     export function plot(plotVariable: number, screen?: 1) {
 
@@ -879,8 +879,8 @@ namespace kitronik_VIEW128x64 {
      * Update or refresh the screen if any data has been changed.
      * @param screen is screen selection when using multiple screens
      */
-    //% group="Control"
-    //% blockId="VIEW128x64_draw" block="refresh display"
+    //% group="컨트롤"
+    //% blockId="VIEW128x64_draw" block="화면 갱신하기"
     //% weight=63 blockGap=8
     export function refresh(screen?: 1) {
 
@@ -897,8 +897,8 @@ namespace kitronik_VIEW128x64 {
      * Invert the colours on the screen (black to white, white to black)
      * @param output toggles between inverting the colours of the display
      */
-    //% group="Control"
-    //% blockId="VIEW128x64_invert_screen" block="inverted display %output=on_off_toggle"
+    //% group="컨트롤"
+    //% blockId="VIEW128x64_invert_screen" block="화면 음영 반전: %output=on_off_toggle"
     //% weight=62 blockGap=8
     export function invert(output: boolean, screen?: 1) {
 
