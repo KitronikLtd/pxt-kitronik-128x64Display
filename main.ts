@@ -142,10 +142,13 @@ namespace kitronik_VIEW128x64 {
      */
     export enum ShowAlign {
         //% block="Left"
+        //% block.loc.ko="왼쪽"
         Left,
         //% block="Centre"
+        //% block.loc.ko="가운데"
         Centre,
         //% block="Right"
+        //% block.loc.ko="오른쪽"
         Right
     }
 
@@ -154,8 +157,10 @@ namespace kitronik_VIEW128x64 {
      */
     export enum LineDirectionSelection {
         //% block="horizontal"
+        //% block.loc.ko="수평"
         horizontal,
         //% block="vertical"
+        //% block.loc.ko="수직"
         vertical
     }
 
@@ -164,8 +169,10 @@ namespace kitronik_VIEW128x64 {
      */
     export enum FontSelection {
         //% block="Normal"
+        //% block.loc.ko="일반"
         Normal,
         //% block="Big"
+        //% block.loc.ko="크게"
         Big
     }
 
