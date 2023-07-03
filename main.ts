@@ -615,7 +615,7 @@ namespace kitronik_VIEW128x64 {
     //% group="Draw"
     //% x.min=0, x.max=127
     //% y.min=0, y.max=63
-    //% len.min=-127, len.max=127
+    //% len.min=-128, len.max=128
     //% inlineInputMode=inline
     export function drawLine(lineDirection: LineDirectionSelection, len: number, x: number, y: number, screen?: 1) {
 
@@ -633,13 +633,13 @@ namespace kitronik_VIEW128x64 {
 
         if (lineDirection == LineDirectionSelection.horizontal) {
 
-            if (len > 127) //check line length is not greater than screen length
-                len = 127       //if so, set to screen length max
+            if (len > 128) //check line length is not greater than screen length
+                len = 128       //if so, set to screen length max
 
             else if (len < 0) {  //check if the line is a negative number
 
-                if (len <= -128)   //limit to maximum screen length as a negative number
-                    len = -127      //set max negative line limit horizontal
+                if (len < -128)   //limit to maximum screen length as a negative number
+                    len = -128      //set max negative line limit horizontal
 
                 len = Math.abs(len) //take absolute of the number for the length
                 x = x - len         //move the X point to the start of the line as drawing left to riight
@@ -651,20 +651,20 @@ namespace kitronik_VIEW128x64 {
                 }
             }
 
-            if ((x + len) > 127)     //check that the length of line from the X start point does not exceed the screen limits
-                len = 127 - x       //if so adjust length to the length from X to the end of screen
+            if ((x + len) > 128)     //check that the length of line from the X start point does not exceed the screen limits
+                len = 128 - x       //if so adjust length to the length from X to the end of screen
             
             for (let hPixel = x; hPixel < (x + len); hPixel++)      // Loop to set the pixels in the horizontal line
                 setPixel(hPixel, y, screen)
         } else if (lineDirection == LineDirectionSelection.vertical) {
 
-            if (len >= 64)          // check for max vertical length
-                len = 63            //if so, set to screen height max
+            if (len > 64)          // check for max vertical length
+                len = 64            //if so, set to screen height max
             
             else if (len < 0) {     //check if the line is a negative number
 
-                if (len <= -63)    //limit to maximum screen length as a negative number
-                    len = -63       //set max negative line limit vertically
+                if (len < -64)    //limit to maximum screen length as a negative number
+                    len = -64       //set max negative line limit vertically
                 
                 len = Math.abs(len) //take absolute value of length and adjust the y value
                 y = y - len         //move the Y point to the start of the line as drawing left to riight
@@ -676,8 +676,8 @@ namespace kitronik_VIEW128x64 {
                 }
             }
 
-            if ((y + len) > 63)   //check that the length of line from the Y start point does not exceed the screen limits
-                len = 63 - y        //if so adjust length to the length from X to the end of screen
+            if ((y + len) > 64)   //check that the length of line from the Y start point does not exceed the screen limits
+                len = 64 - y        //if so adjust length to the length from X to the end of screen
             
             for (let vPixel = y; vPixel < (y + len); vPixel++)      // Loop to set the pixels in the vertical line
                 setPixel(x, vPixel, screen)
@@ -710,9 +710,9 @@ namespace kitronik_VIEW128x64 {
 
         // Draw the lines for each side of the rectangle
         drawLine(LineDirectionSelection.horizontal, width, x, y, screen)
-        drawLine(LineDirectionSelection.horizontal, width, x, y + height, screen)
+        drawLine(LineDirectionSelection.horizontal, width + 1, x, y + height, screen)
         drawLine(LineDirectionSelection.vertical, height, x, y, screen)
-        drawLine(LineDirectionSelection.vertical, height, x + width, y, screen)
+        drawLine(LineDirectionSelection.vertical, height + 1, x + width, y, screen)
     }
 
     /**
