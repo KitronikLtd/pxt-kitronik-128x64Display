@@ -70,7 +70,7 @@ The final factors are the X and Y coordinates for where the line starts. **Note:
 Let's make the X coordinate ``10`` and the Y coordinate ``15``.
 #### ~ tutorialhint
 ```blocks
-kitronik_VIEW128x64.drawLine(kitronik_VIEW128x64.LineDirectionSelection.horiztonal, 20, 10, 15)
+kitronik_VIEW128x64.drawLine(kitronik_VIEW128x64.LineDirectionSelection.horizontal, 20, 10, 15)
 ```
 
 ### Step 8
@@ -80,7 +80,7 @@ Click ``|Download|`` and see the drawn line on the display.
 Add a second ``||kitronik_VIEW128x64.draw line||`` block, but this time, select a ``vertical`` line instead, keeping the numbers the same.
 #### ~ tutorialhint
 ```blocks
-kitronik_VIEW128x64.drawLine(kitronik_VIEW128x64.LineDirectionSelection.horiztonal, 20, 10, 15)
+kitronik_VIEW128x64.drawLine(kitronik_VIEW128x64.LineDirectionSelection.horizontal, 20, 10, 15)
 kitronik_VIEW128x64.drawLine(kitronik_VIEW128x64.LineDirectionSelection.vertical, 20, 10, 15)
 ```
 
@@ -92,9 +92,9 @@ Since it is already halfway complete, see if you can add two more blocks with th
 If you think you have completed it, click ``|Download|`` to see if your coordinates are correct.
 #### ~ tutorialhint
 ```blocks
-kitronik_VIEW128x64.drawLine(kitronik_VIEW128x64.LineDirectionSelection.horiztonal, 20, 10, 15)
+kitronik_VIEW128x64.drawLine(kitronik_VIEW128x64.LineDirectionSelection.horizontal, 20, 10, 15)
 kitronik_VIEW128x64.drawLine(kitronik_VIEW128x64.LineDirectionSelection.vertical, 20, 10, 15)
-kitronik_VIEW128x64.drawLine(kitronik_VIEW128x64.LineDirectionSelection.horiztonal, 20, 10, 35)
+kitronik_VIEW128x64.drawLine(kitronik_VIEW128x64.LineDirectionSelection.horizontal, 20, 10, 35)
 kitronik_VIEW128x64.drawLine(kitronik_VIEW128x64.LineDirectionSelection.vertical, 20, 30, 15)
 ```
 

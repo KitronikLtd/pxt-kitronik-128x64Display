@@ -47,9 +47,9 @@ Clear Pixel will clear a a particular pixel from an X-Y co-ordinates. Range for 
 
 ## drawLine()
 ```blocks
-kitronik_VIEW128x64.drawLine(kitronik_VIEW128x64.LineDirectionSelection.horiztonal, 10, 0, 0)
+kitronik_VIEW128x64.drawLine(kitronik_VIEW128x64.LineDirectionSelection.horizontal, 10, 0, 0)
 ```
-Draw line will  give the option of drawing vertical or horiztonal line on screen.  The required parameters needed are the length (which is the number of pixels) followed by an X-Y co-ordinates.
+Draw line will  give the option of drawing vertical or horizontal line on screen.  The required parameters needed are the length (which is the number of pixels) followed by an X-Y co-ordinates.
 The length is between 0-127, if a vertical line is required any number over 63 will be limited to 63
 Range for the X is 0-127, range for the Y is 0-63
 
